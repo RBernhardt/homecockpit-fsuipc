@@ -1,10 +1,11 @@
 apply plugin: 'java'
+apply plugin: 'signing'
 apply plugin: 'idea'
 apply plugin: 'maven'
 
 group = 'de.newsarea.homecockpit'
 archivesBaseName = 'fsuipc'
-version = '0.9-SNAPSHOT'
+version = '1.0'
 
 repositories {
     mavenCentral()
@@ -14,8 +15,18 @@ dependencies {
     compile "log4j:log4j:1.2.14"
     compile files("lib/fsuipc-1.0.jar")
     runtime files("lib/fsuipc_java-1.0.dll")
-    testCompile "org.mockito:mockito-all:1.8.5"
-    testCompile "org.testng:testng:6.8"
+    testCompile "org.mockito:mockito-all:1.9.5"
+    testCompile "org.testng:testng:6.8.5"
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from 'build/docs/javadoc'
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allSource
+    classifier = 'sources'
 }
 
 jar {
@@ -27,3 +38,75 @@ jar {
     }
     include('de/newsarea/**', 'com/flightsim/**', 'fsuipc*.dll')
 }
+
+artifacts {
+    archives jar
+    archives javadocJar
+    archives sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: sonatypeUsername, password: sonatypePassword)
+            }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: sonatypeUsername, password: sonatypePassword)
+            }
+
+            pom {
+                project {
+                    name 'homecockpit-fsuipc'
+                    packaging 'jar'
+                    description 'Java library for FSUIPC which is based on the java implementation of the FSUIPC SDK.'
+                    url 'https://github.com/RBernhardt/homecockpit-fsuipc'
+
+                    scm {
+                        connection 'scm:git@github.com:RBernhardt/homecockpit-fsuipc.git'
+                        developerConnection 'scm:git@github.com:RBernhardt/homecockpit-fsuipc.git'
+                        url 'git@github.com:RBernhardt/homecockpit-fsuipc.git'
+                    }
+
+                    licenses {
+                        license {
+                            name 'The Apache Software License, Version 2.0'
+                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                            distribution 'repo'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id 'rbernhardt'
+                            name 'Robert Bernhardt'
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+import org.gradle.plugins.signing.Sign
+
+gradle.taskGraph.whenReady { taskGraph ->
+    if (taskGraph.allTasks.any { it instanceof Sign }) {
+        // Use Java 6's console to read from the console (no good for a CI environment)
+        Console console = System.console()
+        console.printf "\n\nWe have to sign some things in this build.\n\nPlease enter your signing details.\n\n"
+
+        def password = console.readPassword("PGP Private Key Password: ")
+
+        allprojects { ext."signing.password" = password }
+
+        console.printf "\nThanks.\n\n"
+    }
+}
+
