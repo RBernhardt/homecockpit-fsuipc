@@ -31,3 +31,7 @@ Java library for FSUIPC which is based on the java implementation of the [FSUIPC
     });
     fsuipcInterface.monitor(new OffsetIdent(0x0570, 8)); // altitude
 
+## Licensing
+
+The project is released under version 2.0 of the Apache License. See LICENSE.txt for details.
+
