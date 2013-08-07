@@ -1,14 +1,14 @@
 package de.newsarea.homecockpit.fsuipc.util;
 
+import de.newsarea.homecockpit.fsuipc.domain.OffsetIdent;
+import de.newsarea.homecockpit.fsuipc.domain.OffsetItem;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import de.newsarea.homecockpit.fsuipc.domain.OffsetIdent;
-import de.newsarea.homecockpit.fsuipc.domain.OffsetItem;
 
 public class FSUIPCUtil {
 	

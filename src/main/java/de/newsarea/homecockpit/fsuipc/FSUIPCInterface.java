@@ -1,10 +1,10 @@
 package de.newsarea.homecockpit.fsuipc;
 
-import java.net.ConnectException;
-
 import de.newsarea.homecockpit.fsuipc.domain.OffsetIdent;
 import de.newsarea.homecockpit.fsuipc.domain.OffsetItem;
 import de.newsarea.homecockpit.fsuipc.event.OffsetEventListener;
+
+import java.net.ConnectException;
 
 public interface FSUIPCInterface {
 	
