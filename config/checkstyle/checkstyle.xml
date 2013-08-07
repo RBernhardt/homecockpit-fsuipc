@@ -1,0 +1,139 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+        "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
+        "http://www.puppycrawl.com/dtds/configuration_1_3.dtd">
+
+<module name="Checker">
+
+    <module name="SuppressionFilter">
+        <property name="file" value="config/checkstyle/suppressions.xml"/>
+    </module>
+
+    <!-- Checks that a package-info.java file exists for each package.     -->
+    <!-- See http://checkstyle.sf.net/config_javadoc.html#JavadocPackage
+    <module name="JavadocPackage">
+        <property name="severity" value="info"/>
+    </module>
+    -->
+
+    <module name="TreeWalker">
+
+        <!-- Checks for Javadoc comments.                     -->
+        <!-- See http://checkstyle.sf.net/config_javadoc.html -->
+        <!-- javadoc on types
+        <module name="JavadocType">
+            <property name="scope" value="public"/>
+            <property name="severity" value="info"/>
+        </module>
+        -->
+
+        <!-- Checks for Naming Conventions.                  -->
+        <!-- See http://checkstyle.sf.net/config_naming.html -->
+        <module name="ConstantName">
+            <property name="severity" value="info"/>
+        </module>
+        <module name="LocalFinalVariableName">
+            <property name="severity" value="info"/>
+        </module>
+        <module name="LocalVariableName">
+            <property name="severity" value="info"/>
+        </module>
+        <module name="MemberName">
+            <property name="severity" value="info"/>
+        </module>
+        <module name="MethodName">
+            <property name="severity" value="info"/>
+        </module>
+        <module name="PackageName">
+            <property name="severity" value="info"/>
+        </module>
+        <module name="ParameterName">
+            <property name="severity" value="info"/>
+        </module>
+        <module name="StaticVariableName">
+            <property name="severity" value="info"/>
+        </module>
+        <module name="TypeName">
+            <property name="severity" value="info"/>
+        </module>
+
+        <!-- Checks for imports                              -->
+        <!-- See http://checkstyle.sf.net/config_import.html -->
+        <!--module name="AvoidStarImport"/-->
+        <module name="IllegalImport"/>
+        <module name="RedundantImport">
+            <property name="severity" value="warning"/>
+        </module>
+        <module name="UnusedImports">
+            <property name="severity" value="warning"/>
+        </module>
+
+        <!-- Checks for Size Violations.                    -->
+        <!-- See http://checkstyle.sf.net/config_sizes.html -->
+        <module name="LineLength">
+            <property name="max" value="200"/>
+            <property name="severity" value="warning"/>
+        </module>
+        <!-- max length of a method is 150 lines -->
+        <module name="MethodLength">
+            <property name="max" value="150"/>
+            <property name="severity" value="warning"/>
+        </module>
+        <!-- max number of parameters is 7
+        <module name="ParameterNumber">
+            <property name="tokens" value="METHOD_DEF"/>
+        </module>
+        -->
+
+        <!-- Modifier Checks                                    -->
+        <!-- See http://checkstyle.sf.net/config_modifiers.html -->
+        <!--
+            public, protected, private, abstract, static, final, transient, volatile, synchronized, native, strictfp
+        -->
+        <module name="ModifierOrder">
+            <property name="severity" value="info"/>
+        </module>
+        <!--
+        interface and annotation definitions,
+        the final modifier on methods of final classes, and
+        inner interface declarations that are declared as static
+        -->
+        <module name="RedundantModifier">
+            <property name="severity" value="info"/>
+        </module>
+
+        <!-- Checks for common coding problems               -->
+        <!-- See http://checkstyle.sf.net/config_coding.html -->
+        <module name="EqualsHashCode"/>
+
+        <!-- Checks for class design                         -->
+        <!-- See http://checkstyle.sf.net/config_design.html -->
+        <!-- Checks that a class which has only private constructors is declared as final. -->
+        <module name="FinalClass">
+            <property name="severity" value="warning"/>
+        </module>
+        <!-- Utility Classes with only static methods should have a privat constructor -->
+        <module name="HideUtilityClassConstructor">
+            <property name="severity" value="warning"/>
+        </module>
+
+        <!-- Miscellaneous other checks.                   -->
+        <!-- See http://checkstyle.sf.net/config_misc.html -->
+        <!-- Enforces Java style: public static void main(String[] args) -->
+        <module name="ArrayTypeStyle">
+            <property name="severity" value="info"/>
+        </module>
+        <!-- Parameters of Methods should be final
+        <module name="FinalParameters"/ -->
+        <!-- Checks for to do in comments -->
+        <module name="TodoComment">
+            <property name="severity" value="warning"/>
+        </module>
+        <!-- The exact rule is that nonprivate, nonstatic methods of classes that can be subclassed must either be
+            abstract or final or have an empty implementation
+        <module name="DesignForExtension"/>
+        -->
+
+    </module>
+
+</module>

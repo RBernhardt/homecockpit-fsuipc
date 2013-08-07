@@ -1,17 +1,10 @@
 package de.newsarea.homecockpit.fsuipc.util;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.math.BigInteger;
 
-public class DataTypeUtil {
-	
-	private static Logger log = LoggerFactory.getLogger(DataTypeUtil.class);
-	
-	private DataTypeUtil() {
-		log.debug("call constructor");
-	}
+public final class DataTypeUtil {
+
+	private DataTypeUtil() { }
 	
 	public static long toLong(byte[] data) {
 		if(data.length != 8) { throw new IllegalArgumentException("invalid byte array length - " + data.length); }

@@ -10,9 +10,11 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class FSUIPCUtil {
+public final class FSUIPCUtil {
 	
-	private static String REGEX_ITEMS = "\\[\\s*(.*?)\\s*\\]";
+	private static final String REGEX_ITEMS = "\\[\\s*(.*?)\\s*\\]";
+
+    private FSUIPCUtil() { }
 			
 	public static OffsetItem toOffsetItem(String value) {
 		Pattern p = Pattern.compile("([0-9]+)\\s*,\\s*([0-9]+)\\s*,\\s*([-0-9]+)");

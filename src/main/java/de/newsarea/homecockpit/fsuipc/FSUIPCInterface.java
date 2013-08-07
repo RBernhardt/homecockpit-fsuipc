@@ -8,18 +8,18 @@ import java.net.ConnectException;
 
 public interface FSUIPCInterface {
 	
-	public void open() throws ConnectException;
-	/* */
-	public void monitor(OffsetIdent[] offsetIdents);
-	public void monitor(OffsetIdent offsetIdent);
-	/* */
-	public void write(OffsetItem[] offsetItems);
-	public void write(OffsetItem offsetItem);
-	/* */
-	public byte[] read(OffsetIdent offsetIdent);
-	/* */
-	public void close();	
-	/* */
-	public void addEventListener(OffsetEventListener valueEventListener);
+	void open() throws ConnectException;
+
+	void monitor(OffsetIdent[] offsetIdents);
+	void monitor(OffsetIdent offsetIdent);
+
+	void write(OffsetItem[] offsetItems);
+	void write(OffsetItem offsetItem);
+
+	byte[] read(OffsetIdent offsetIdent);
+
+	void close();
+
+	void addEventListener(OffsetEventListener valueEventListener);
 
 }
