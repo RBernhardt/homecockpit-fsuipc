@@ -1,26 +1,22 @@
 package de.newsarea.homecockpit.fsuipc.flightsim;
 
+import de.newsarea.homecockpit.fsuipc.FSUIPCInterface;
+import de.newsarea.homecockpit.fsuipc.domain.OffsetIdent;
+import de.newsarea.homecockpit.fsuipc.domain.OffsetItem;
+import de.newsarea.homecockpit.fsuipc.event.OffsetEventListener;
+import de.newsarea.homecockpit.fsuipc.util.DataTypeUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.net.ConnectException;
-import java.util.ArrayList;
-import java.util.EventListener;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import de.newsarea.homecockpit.fsuipc.FSUIPCInterface;
-import de.newsarea.homecockpit.fsuipc.domain.OffsetIdent;
-import de.newsarea.homecockpit.fsuipc.domain.OffsetItem;
-import org.apache.log4j.Logger;
-
-import de.newsarea.homecockpit.fsuipc.util.DataTypeUtil;
-import de.newsarea.homecockpit.fsuipc.event.OffsetEventListener;
-
 public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 
-	private static Logger log = Logger.getLogger(FSUIPCFlightSimInterface.class);
+	private static Logger log = LoggerFactory.getLogger(FSUIPCFlightSimInterface.class);
 
     private static FSUIPCFlightSimInterface fsuipcFlightSimInterface;
 
@@ -102,7 +98,7 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 		private final Lock readLock = rwLock.readLock();
 		private final Lock writeLock = rwLock.writeLock();
 
-		private List<OffsetEventListener> eventListeners = new ArrayList<OffsetEventListener>();
+		private List<OffsetEventListener> eventListeners = new ArrayList<>();
 
 		private FSUIPCFlightSimInterface fsuipcFlightSimInterface;
 		private Map<String, OffsetIdent> monitorOffsetList;
@@ -111,8 +107,8 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 
 		public MonitorOffsetThread(FSUIPCFlightSimInterface fsuipcFlightSimInterface) {
 			this.fsuipcFlightSimInterface = fsuipcFlightSimInterface;
-			this.monitorOffsetList = new HashMap<String, OffsetIdent>();
-			this.offsetValues = new HashMap<Integer, byte[]>();
+			this.monitorOffsetList = new HashMap<>();
+			this.offsetValues = new HashMap<>();
 		}
 
 		public void run() {

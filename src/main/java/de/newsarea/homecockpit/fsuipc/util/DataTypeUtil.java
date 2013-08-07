@@ -1,12 +1,13 @@
 package de.newsarea.homecockpit.fsuipc.util;
 
-import java.math.BigInteger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import org.apache.log4j.Logger;
+import java.math.BigInteger;
 
 public class DataTypeUtil {
 	
-	private static Logger log = Logger.getLogger(DataTypeUtil.class);
+	private static Logger log = LoggerFactory.getLogger(DataTypeUtil.class);
 	
 	private DataTypeUtil() {
 		log.debug("call constructor");
@@ -139,7 +140,7 @@ public class DataTypeUtil {
 	}
 	
 	public static boolean isHighBit(byte[] data, int idx) {
-		int bidx = (int)(idx / 8);
+		int bidx = (idx / 8);
 		byte nidx = (byte)(idx % 8);		
 		return isHighBit(data[data.length - 1 - bidx], nidx);
 	}

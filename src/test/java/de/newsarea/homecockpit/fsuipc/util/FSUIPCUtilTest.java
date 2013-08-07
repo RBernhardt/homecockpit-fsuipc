@@ -1,17 +1,10 @@
 package de.newsarea.homecockpit.fsuipc.util;
 
 import de.newsarea.homecockpit.fsuipc.domain.OffsetItem;
-import org.apache.log4j.BasicConfigurator;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class FSUIPCUtilTest {
-
-    @BeforeClass
-    public static void beforeClass() {
-        BasicConfigurator.configure();
-    }
 
     @Test
     public void testToAlititude() {
