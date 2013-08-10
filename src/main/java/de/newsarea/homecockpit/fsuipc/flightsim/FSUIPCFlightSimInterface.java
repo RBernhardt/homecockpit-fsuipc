@@ -5,11 +5,14 @@ import de.newsarea.homecockpit.fsuipc.domain.OffsetIdent;
 import de.newsarea.homecockpit.fsuipc.domain.OffsetItem;
 import de.newsarea.homecockpit.fsuipc.event.OffsetEventListener;
 import de.newsarea.homecockpit.fsuipc.util.DataTypeUtil;
+import org.apache.commons.lang3.event.EventListenerSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.ConnectException;
-import java.util.*;
+import java.util.EventListener;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -38,56 +41,52 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
         this.monitorOffsetThread = new FSUIPCFlightSimInterface.MonitorOffsetThread(this);
     }
 
-	public boolean isConnected() {
-		return this.monitorOffsetThread.isAlive();
-	}
-
 	public void open() throws ConnectException {
-		this.fsuipcFlightSimWrapper.open();
-		this.monitorOffsetThread.start();
+		fsuipcFlightSimWrapper.open();
+		monitorOffsetThread.start();
 	}
 	
 	public void monitor(OffsetIdent[] offsetIdents) {
 		for(OffsetIdent offsetIdent : offsetIdents) {
-			this.monitorOffsetThread.monitorOffset(offsetIdent);
+			monitorOffsetThread.monitorOffset(offsetIdent);
 		}
 	}
 	
 	public void monitor(OffsetIdent offsetIdent) {
-		this.monitor(new OffsetIdent[] { offsetIdent });
+		monitor(new OffsetIdent[] { offsetIdent });
 	}
 	
 	public void write(OffsetItem[] offsetItems) {
 		int firstOffset = offsetItems[0].getOffset();
 		byte[] data = this.createByteArray(offsetItems);
 		log.debug(firstOffset + " : " + data.length + " : " + DataTypeUtil.toHexString(data));
-		this.write(new OffsetItem(firstOffset, data.length, data));
+		write(new OffsetItem(firstOffset, data.length, data));
 	}
 	
 	public void write(OffsetItem offsetItem) {
 		byte[] data = DataTypeUtil.toLittleEndian(offsetItem.getValue());
 		log.debug("write offset item - " + offsetItem);
-		this.fsuipcFlightSimWrapper.write(offsetItem.getOffset(), offsetItem.getSize(), data);
+		fsuipcFlightSimWrapper.write(offsetItem.getOffset(), offsetItem.getSize(), data);
 		log.debug("offset item written - " + offsetItem);
 	}
 
 	public byte[] read(OffsetIdent offsetIdent) {		
-		byte[] data = this.fsuipcFlightSimWrapper.read(offsetIdent.getOffset(), offsetIdent.getSize());
+		byte[] data = fsuipcFlightSimWrapper.read(offsetIdent.getOffset(), offsetIdent.getSize());
 		return DataTypeUtil.toLittleEndian(data);
 	}
 
 	public void close() {
-		this.monitorOffsetThread.exit();
+		monitorOffsetThread.exit();
 		try {
-			this.monitorOffsetThread.join();
+			monitorOffsetThread.join();
 		} catch (InterruptedException e) {
 			log.error(e.getMessage(), e);
 		}
-		this.fsuipcFlightSimWrapper.close();
+		fsuipcFlightSimWrapper.close();
 	}
 
 	public void addEventListener(OffsetEventListener offsetEventListener) {
-		this.monitorOffsetThread.addEventListener(offsetEventListener);
+		monitorOffsetThread.addEventListener(offsetEventListener);
 	}
 
 	/* */
@@ -98,7 +97,7 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 		private final Lock readLock = rwLock.readLock();
 		private final Lock writeLock = rwLock.writeLock();
 
-		private List<OffsetEventListener> eventListeners = new ArrayList<>();
+		private EventListenerSupport<OffsetEventListener> eventListeners;
 
 		private FSUIPCFlightSimInterface fsuipcFlightSimInterface;
 		private Map<String, OffsetIdent> monitorOffsetList;
@@ -109,44 +108,44 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 			this.fsuipcFlightSimInterface = fsuipcFlightSimInterface;
 			this.monitorOffsetList = new HashMap<>();
 			this.offsetValues = new HashMap<>();
+            this.eventListeners = EventListenerSupport.create(OffsetEventListener.class);
 		}
 
 		public void run() {
 			try {
-				while (!this.exit) {
+				while (!exit) {
 					// lock mutex
-					this.readLock.lock();
+					readLock.lock();
 					//
 					try {
 						// iterate monitor offsets
-						for (OffsetIdent monitorOffsetIdent : this.monitorOffsetList.values()) {
-							if (this.exit) {
+						for (OffsetIdent monitorOffsetIdent : monitorOffsetList.values()) {
+							if (exit) {
 								break;
 							}
 							//
 							int mOffset = monitorOffsetIdent.getOffset();
-							byte[] newOffsetValue = this.fsuipcFlightSimInterface.read(new OffsetIdent(mOffset, monitorOffsetIdent.getSize()));
+							byte[] newOffsetValue = fsuipcFlightSimInterface.read(new OffsetIdent(mOffset, monitorOffsetIdent.getSize()));
 							// determine old offset value
 							byte[] oldOffsetValue = null;
-							if (this.offsetValues.containsKey(mOffset)) {
-								oldOffsetValue = this.offsetValues.get(mOffset);
+							if (offsetValues.containsKey(mOffset)) {
+								oldOffsetValue = offsetValues.get(mOffset);
 							}
 							// send new offset value
 							if (!DataTypeUtil.isEquals(newOffsetValue, oldOffsetValue)) {
 								OffsetItem oItem = new OffsetItem(mOffset, monitorOffsetIdent.getSize(), newOffsetValue);
-								this.fireEvent(oItem);
+								eventListeners.fire().offsetValueChanged(oItem);
 							}
 							// save new offset value
-							if (this.offsetValues.containsKey(mOffset)) {
-								this.offsetValues.remove(mOffset);
+							if (offsetValues.containsKey(mOffset)) {
+								offsetValues.remove(mOffset);
 							}
-							this.offsetValues.put(mOffset, newOffsetValue);
+							offsetValues.put(mOffset, newOffsetValue);
 						}
 					} finally {
 						// unlock mutex
-						this.readLock.unlock();
+						readLock.unlock();
 					}
-					//
 					Thread.sleep(1);
 				}
 			} catch (InterruptedException e) {
@@ -155,33 +154,25 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 		}
 
 		public void monitorOffset(OffsetIdent offsetIdent) {
-			this.writeLock.lock();
+			writeLock.lock();
 			try {
-				if(!this.monitorOffsetList.containsKey(offsetIdent.toString())) {
+				if(!monitorOffsetList.containsKey(offsetIdent.toString())) {
 					log.debug("monitor offset - " + offsetIdent.toString());
-					this.monitorOffsetList.put(offsetIdent.toString(), offsetIdent);
+					monitorOffsetList.put(offsetIdent.toString(), offsetIdent);
 				}
 			} finally { 
-				this.writeLock.unlock();
+				writeLock.unlock();
 			}
 		}
 
 		public void exit() {
-			this.exit = true;
+			exit = true;
 		}
 
 		public void addEventListener(OffsetEventListener offsetEventListener) {
-			this.eventListeners.add(offsetEventListener);
+			eventListeners.addListener(offsetEventListener);
 		}
 
-		private void fireEvent(OffsetItem offsetItem) {
-			if (this.eventListeners.size() == 0) {
-				return;
-			}
-			for (OffsetEventListener eventListener : this.eventListeners) {
-				eventListener.offsetValueChanged(offsetItem);
-			}
-		}
 
 	}
 
