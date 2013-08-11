@@ -15,50 +15,39 @@ public final class FSUIPCUtil {
 	private static final String REGEX_ITEMS = "\\[\\s*(.*?)\\s*\\]";
 
     private FSUIPCUtil() { }
-			
+
+    /**
+     * use OffsetItem.from(String value)
+     */
+    @Deprecated
 	public static OffsetItem toOffsetItem(String value) {
-		Pattern p = Pattern.compile("([0-9]+)\\s*,\\s*([0-9]+)\\s*,\\s*([-0-9]+)");
-		Matcher m = p.matcher(value);
-		while(m.find()) {
-			int offset = Integer.parseInt(m.group(1));
-			int size = Integer.parseInt(m.group(2));
-			byte[] bValue = DataTypeUtil.toByteArray(m.group(3), size);
-			//
-			return new OffsetItem(offset, size, bValue);
-		}
-		//
-		return null;
+		return OffsetItem.from(value);
 	}
-	
+
 	public static OffsetItem[] toOffsetItems(String value) {
-		List<OffsetItem> items = new ArrayList<OffsetItem>();
+		List<OffsetItem> items = new ArrayList<>();
 		Pattern pOffsetObj = Pattern.compile(REGEX_ITEMS);
 		Matcher mOffsetObj = pOffsetObj.matcher(value);
 		while(mOffsetObj.find()) {
-			items.add(toOffsetItem(mOffsetObj.group()));
+			items.add(OffsetItem.from(mOffsetObj.group()));
 		}	
 		return items.toArray(new OffsetItem[] { });
 	}
-	
+
+    /**
+     * use OffsetIdent.from(String value)
+     */
+    @Deprecated
 	public static OffsetIdent toOffsetIdent(String value) {
-		Pattern p = Pattern.compile("([0-9]+)\\s*,\\s*([0-9]+)\\s*");
-		Matcher m = p.matcher(value);
-		while(m.find()) {
-			int offset = Integer.parseInt(m.group(1));
-			int size = Integer.parseInt(m.group(2));
-			//
-			return new OffsetIdent(offset, size);
-		}
-		//
-		return null;
+		return OffsetIdent.from(value);
 	}
 	
 	public static OffsetIdent[] toOffsetIdents(String value) {
-		List<OffsetIdent> items = new ArrayList<OffsetIdent>();
+		List<OffsetIdent> items = new ArrayList<>();
 		Pattern pOffsetObj = Pattern.compile(REGEX_ITEMS);
 		Matcher mOffsetObj = pOffsetObj.matcher(value);
 		while(mOffsetObj.find()) {
-			items.add(toOffsetIdent(mOffsetObj.group()));
+			items.add(OffsetIdent.from(mOffsetObj.group()));
 		}	
 		return items.toArray(new OffsetIdent[] { });
 	}
@@ -72,7 +61,7 @@ public final class FSUIPCUtil {
 			strBld.append(",");
 			strBld.append(offsetItem.getSize());
 			strBld.append(",");
-			strBld.append(DataTypeUtil.toString(offsetItem.getValue()));
+			strBld.append(offsetItem.getValue().toNumberString());
 			strBld.append("]");
 			strBld.append(",");
 		}

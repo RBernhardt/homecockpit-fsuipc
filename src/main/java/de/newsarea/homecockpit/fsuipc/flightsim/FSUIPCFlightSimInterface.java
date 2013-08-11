@@ -1,10 +1,10 @@
 package de.newsarea.homecockpit.fsuipc.flightsim;
 
 import de.newsarea.homecockpit.fsuipc.FSUIPCInterface;
+import de.newsarea.homecockpit.fsuipc.domain.ByteArray;
 import de.newsarea.homecockpit.fsuipc.domain.OffsetIdent;
 import de.newsarea.homecockpit.fsuipc.domain.OffsetItem;
 import de.newsarea.homecockpit.fsuipc.event.OffsetEventListener;
-import de.newsarea.homecockpit.fsuipc.util.DataTypeUtil;
 import org.apache.commons.lang3.event.EventListenerSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,20 +59,21 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 	public void write(OffsetItem[] offsetItems) {
 		int firstOffset = offsetItems[0].getOffset();
 		byte[] data = this.createByteArray(offsetItems);
-		log.debug(firstOffset + " : " + data.length + " : " + DataTypeUtil.toHexString(data));
-		write(new OffsetItem(firstOffset, data.length, data));
+        ByteArray byteArray = ByteArray.create(data);
+		log.debug(firstOffset + " : " + byteArray.getSize() + " : " + byteArray.toString());
+		write(new OffsetItem(firstOffset, data.length, byteArray));
 	}
 	
 	public void write(OffsetItem offsetItem) {
-		byte[] data = DataTypeUtil.toLittleEndian(offsetItem.getValue());
 		log.debug("write offset item - " + offsetItem);
-		fsuipcFlightSimWrapper.write(offsetItem.getOffset(), offsetItem.getSize(), data);
+		fsuipcFlightSimWrapper.write(offsetItem.getOffset(), offsetItem.getSize(), offsetItem.getValue().toLittleEndian());
 		log.debug("offset item written - " + offsetItem);
 	}
 
-	public byte[] read(OffsetIdent offsetIdent) {		
+	public OffsetItem read(OffsetIdent offsetIdent) {
 		byte[] data = fsuipcFlightSimWrapper.read(offsetIdent.getOffset(), offsetIdent.getSize());
-		return DataTypeUtil.toLittleEndian(data);
+        ByteArray byteArray = ByteArray.create(data, true);
+        return new OffsetItem(offsetIdent.getOffset(), offsetIdent.getSize(), byteArray);
 	}
 
 	public void close() {
@@ -101,7 +102,7 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 
 		private FSUIPCFlightSimInterface fsuipcFlightSimInterface;
 		private Map<String, OffsetIdent> monitorOffsetList;
-		private Map<Integer, byte[]> offsetValues;
+		private Map<Integer, ByteArray> offsetValues;
 		private boolean exit = false;
 
 		public MonitorOffsetThread(FSUIPCFlightSimInterface fsuipcFlightSimInterface) {
@@ -125,22 +126,21 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 							}
 							//
 							int mOffset = monitorOffsetIdent.getOffset();
-							byte[] newOffsetValue = fsuipcFlightSimInterface.read(new OffsetIdent(mOffset, monitorOffsetIdent.getSize()));
+							OffsetItem newOffsetItem = fsuipcFlightSimInterface.read(new OffsetIdent(mOffset, monitorOffsetIdent.getSize()));
 							// determine old offset value
-							byte[] oldOffsetValue = null;
+							ByteArray oldOffsetValue = null;
 							if (offsetValues.containsKey(mOffset)) {
 								oldOffsetValue = offsetValues.get(mOffset);
 							}
 							// send new offset value
-							if (!DataTypeUtil.isEquals(newOffsetValue, oldOffsetValue)) {
-								OffsetItem oItem = new OffsetItem(mOffset, monitorOffsetIdent.getSize(), newOffsetValue);
-								eventListeners.fire().offsetValueChanged(oItem);
+							if (!newOffsetItem.getValue().equals(oldOffsetValue)) {
+								eventListeners.fire().offsetValueChanged(newOffsetItem);
 							}
 							// save new offset value
 							if (offsetValues.containsKey(mOffset)) {
 								offsetValues.remove(mOffset);
 							}
-							offsetValues.put(mOffset, newOffsetValue);
+							offsetValues.put(mOffset, newOffsetItem.getValue());
 						}
 					} finally {
 						// unlock mutex
@@ -190,12 +190,12 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 				throw new IllegalArgumentException("expected offset was " + currentOffset + " but was " + offsetItem.getOffset());
 			}	
 			//
-			for(int j=0; j < offsetItem.getValue().length; j++) {
+			for(int j=0; j < offsetItem.getValue().getSize(); j++) {
 				int lOffset = lastOffset - currentOffset - offsetItem.getSize();
 				if(lOffset < 0) {
 					throw new IllegalArgumentException("invalid first or last offset item detected - " + offsetItems[0].getOffset() + " : " + lastOffset + " : " + output.length);
 				}
-				output[lOffset + j] = offsetItem.getValue()[j];
+				output[lOffset + j] = offsetItem.getValue().get(j);
 			}
 			//
 			currentOffset += offsetItem.getSize();

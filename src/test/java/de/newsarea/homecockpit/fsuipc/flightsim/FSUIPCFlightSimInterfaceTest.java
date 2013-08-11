@@ -1,5 +1,6 @@
 package de.newsarea.homecockpit.fsuipc.flightsim;
 
+import de.newsarea.homecockpit.fsuipc.domain.ByteArray;
 import de.newsarea.homecockpit.fsuipc.domain.OffsetIdent;
 import de.newsarea.homecockpit.fsuipc.domain.OffsetItem;
 import org.mockito.invocation.InvocationOnMock;
@@ -16,7 +17,6 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.*;
 import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertTrue;
-import static org.testng.internal.junit.ArrayAsserts.assertArrayEquals;
 
 public class FSUIPCFlightSimInterfaceTest {
 
@@ -54,7 +54,7 @@ public class FSUIPCFlightSimInterfaceTest {
     @Test
     public void testRead() {
         when(flightSimWrapper.read(1010, 4)).thenReturn(new byte[] { 1 });
-        assertArrayEquals(new byte[]{1}, fsuipcFlightSimInterface.read(new OffsetIdent(1010, 4)));
+        assertEquals(new OffsetItem(1010, 4, ByteArray.create("1", 1)), fsuipcFlightSimInterface.read(new OffsetIdent(1010, 4)));
     }
 
     @Test
@@ -64,7 +64,7 @@ public class FSUIPCFlightSimInterfaceTest {
         assertEquals(1000, lastWriteOffsetItems.get(0).getOffset());
         assertEquals(8, lastWriteOffsetItems.get(0).getSize());
         // return little endian byte order
-        assertArrayEquals(new byte[]{7, 6, 5}, lastWriteOffsetItems.get(0).getValue());
+        assertEquals(ByteArray.create(new byte[]{7, 6, 5}), lastWriteOffsetItems.get(0).getValue());
     }
 
     @Test
@@ -81,7 +81,7 @@ public class FSUIPCFlightSimInterfaceTest {
         OffsetItem wOffsetItem = lastWriteOffsetItems.get(0);
         assertEquals(1000, wOffsetItem.getOffset());
         assertEquals(12, wOffsetItem.getSize());
-        assertArrayEquals(new byte[]{4, 4, 4, 4, 1, 5, 5, 5, 5, 5, 2, 2}, wOffsetItem.getValue());
+        assertEquals(ByteArray.create(new byte[]{4, 4, 4, 4, 1, 5, 5, 5, 5, 5, 2, 2}), wOffsetItem.getValue());
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
