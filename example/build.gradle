@@ -2,12 +2,12 @@ apply plugin: 'application'
 
 archivesBaseName = 'fsuipc-example'
 
+mainClassName = "de.newsarea.homecockpit.fsuipc.example.Application"
+
 dependencies {
     compile project(":fsuipc")
     compile "org.slf4j:slf4j-simple:1.7.5"
 }
-
-mainClassName = "de.newsarea.homecockpit.fsuipc.example.CommandLineRunner"
 
 task copyLibs(type: Copy) {
     from configurations.compile {

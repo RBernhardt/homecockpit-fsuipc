@@ -7,10 +7,10 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.net.ConnectException;
 
-public class CommandLineRunner {
+public class Application {
 
     public static void main(String[] args) throws InterruptedException, ConnectException {
-        CommandLineRunner commandLineRunner = new CommandLineRunner();
+        Application commandLineRunner = new Application();
         commandLineRunner.run();
     }
 
