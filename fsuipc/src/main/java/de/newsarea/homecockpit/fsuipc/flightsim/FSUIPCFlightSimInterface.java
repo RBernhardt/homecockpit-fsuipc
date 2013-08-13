@@ -33,8 +33,8 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
         return fsuipcFlightSimInterface;
     }
 
-	private FSUIPCFlightSimWrapper fsuipcFlightSimWrapper;
-	private MonitorOffsetThread monitorOffsetThread;
+	private final FSUIPCFlightSimWrapper fsuipcFlightSimWrapper;
+	private final MonitorOffsetThread monitorOffsetThread;
 
     FSUIPCFlightSimInterface(FSUIPCFlightSimWrapper fsuipcFlightSimWrapper) {
         this.fsuipcFlightSimWrapper = fsuipcFlightSimWrapper;
@@ -42,8 +42,12 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
     }
 
 	public void open() throws ConnectException {
-		fsuipcFlightSimWrapper.open();
-		monitorOffsetThread.start();
+        try {
+		    fsuipcFlightSimWrapper.open();
+		    monitorOffsetThread.start();
+        } catch(Exception ex) {
+            throw new ConnectException(ex.getMessage());
+        }
 	}
 	
 	public void monitor(OffsetIdent[] offsetIdents) {
@@ -98,11 +102,11 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 		private final Lock readLock = rwLock.readLock();
 		private final Lock writeLock = rwLock.writeLock();
 
-		private EventListenerSupport<OffsetEventListener> eventListeners;
+		private final EventListenerSupport<OffsetEventListener> eventListeners;
 
-		private FSUIPCFlightSimInterface fsuipcFlightSimInterface;
-		private Map<String, OffsetIdent> monitorOffsetList;
-		private Map<Integer, ByteArray> offsetValues;
+		private final FSUIPCFlightSimInterface fsuipcFlightSimInterface;
+		private final Map<String, OffsetIdent> monitorOffsetList;
+		private final Map<Integer, ByteArray> offsetValues;
 		private boolean exit = false;
 
 		public MonitorOffsetThread(FSUIPCFlightSimInterface fsuipcFlightSimInterface) {

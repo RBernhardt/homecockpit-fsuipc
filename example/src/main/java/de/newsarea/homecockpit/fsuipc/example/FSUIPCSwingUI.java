@@ -11,11 +11,11 @@ import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-public class FSUIPCSwingUI {
+class FSUIPCSwingUI extends JFrame {
 
-    private FSUIPCInterface fsuipcInterface;
-    private JLabel lLngLabel;
+    private final FSUIPCInterface fsuipcInterface;
     private JLabel lLatLabel;
+    private JLabel lLngLabel;
     private JLabel lAltLabel;
 
     public FSUIPCSwingUI(FSUIPCInterface fsuipcInterface) {
@@ -23,26 +23,26 @@ public class FSUIPCSwingUI {
     }
 
     public void initialize() {
-        JFrame frame = new JFrame();
-        frame.setSize(250, 150);
-        frame.setLayout(null);
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setTitle("FSUIPC Example");
+        setSize(300, 160);
+        setLayout(null);
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         // add latitude
-        frame.add(createTitleLabel("Longitude:", 10));
-        lLngLabel = createValueLabel("0.0", 10);
-        frame.add(lLngLabel);
-        // add longitude
-        frame.add(createTitleLabel("Latitude:", 30));
+        add(createTitleLabel("Latitude:", 30));
         lLatLabel = createValueLabel("0.0", 30);
-        frame.add(lLatLabel);
+        add(lLatLabel);
+        // add longitude
+        add(createTitleLabel("Longitude:", 10));
+        lLngLabel = createValueLabel("0.0", 10);
+        add(lLngLabel);
         // add altitude
-        frame.add(createTitleLabel("Altitude:", 50));
+        add(createTitleLabel("Altitude:", 50));
         lAltLabel = createValueLabel("0", 50);
-        frame.add(lAltLabel);
+        add(lAltLabel);
         // add pause hint
-        frame.add(createTitleLabel("PRESS [P] TO PAUSE", 100));
+        add(createTitleLabel("PRESS [P] TO PAUSE", 100));
         // ~
-        frame.addKeyListener(new KeyListener() {
+        addKeyListener(new KeyListener() {
             @Override
             public void keyTyped(KeyEvent e) { }
             @Override
@@ -54,14 +54,20 @@ public class FSUIPCSwingUI {
             @Override
             public void keyReleased(KeyEvent e) { }
         });
-        frame.setVisible(true);
         // ~
+        initializeFSUIPCInterface();
+    }
+
+    private void initializeFSUIPCInterface() {
         fsuipcInterface.addEventListener(new OffsetEventListener() {
             @Override
             public void offsetValueChanged(OffsetItem offsetItem) {
                 handleOffsetValueChanged(offsetItem);
             }
         });
+        fsuipcInterface.monitor(new OffsetIdent(0x0560, 8)); // latitude
+        fsuipcInterface.monitor(new OffsetIdent(0x0568, 8)); // longitude
+        fsuipcInterface.monitor(new OffsetIdent(0x0570, 8)); // altitude
     }
 
     /***
@@ -69,7 +75,7 @@ public class FSUIPCSwingUI {
      */
     private void togglePause() {
         OffsetItem pauseOffsetItem = fsuipcInterface.read(new OffsetIdent(0x0262, 2));
-        int pauseOffsetValue = pauseOffsetItem.getValue().toByte();
+        int pauseOffsetValue = pauseOffsetItem.getValue().toShort();
         switch(pauseOffsetValue) {
             case 0:
                 fsuipcInterface.write(new OffsetItem(0x0262, 2, ByteArray.create("1", 2)));
@@ -84,17 +90,16 @@ public class FSUIPCSwingUI {
 
     private void handleOffsetValueChanged(OffsetItem offsetItem) {
         switch (offsetItem.getOffset()) {
-            case 0x0568: // longitude
-                lLngLabel.setText(String.valueOf(FSUIPCUtil.toLongitude(offsetItem.getValue().toLong())));
-                break;
             case 0x0560: // latitude
                 lLatLabel.setText(String.valueOf(FSUIPCUtil.toLatitude(offsetItem.getValue().toLong())));
+                break;
+            case 0x0568: // longitude
+                lLngLabel.setText(String.valueOf(FSUIPCUtil.toLongitude(offsetItem.getValue().toLong())));
                 break;
             case 0x0570: // altitude
                 lAltLabel.setText(String.valueOf(FSUIPCUtil.toAlititude(offsetItem.getValue().toLong())));
                 break;
-            default:
-                // do nothing
+            default: // do nothing
                 break;
         }
     }
@@ -109,7 +114,7 @@ public class FSUIPCSwingUI {
     private JLabel createValueLabel(String defaultValue, int y) {
         JLabel label = new JLabel(defaultValue);
         label.setLocation(100, y);
-        label.setSize(100, 20);
+        label.setSize(200, 20);
         return label;
     }
 

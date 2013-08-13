@@ -31,6 +31,7 @@
         <!-- See http://checkstyle.sf.net/config_naming.html -->
         <module name="ConstantName">
             <property name="severity" value="info"/>
+            <property name="format" value="^([A-Z][A-Z0-9]*(_[A-Z0-9]+)*|log)$"/>
         </module>
         <module name="LocalFinalVariableName">
             <property name="severity" value="info"/>

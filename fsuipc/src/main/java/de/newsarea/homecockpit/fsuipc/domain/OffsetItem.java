@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 
 public class OffsetItem extends OffsetIdent {
 	
-	private ByteArray value;
+	private final ByteArray value;
 
     /* @Deprecated
 	public byte[] getRawValue() {

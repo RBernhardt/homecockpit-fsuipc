@@ -6,8 +6,8 @@ import java.util.regex.Pattern;
 
 public class OffsetIdent {
 	
-	private int offset;
-	private int size;
+	private final int offset;
+	private final int size;
 	
 	public int getOffset() {
 		return this.offset;

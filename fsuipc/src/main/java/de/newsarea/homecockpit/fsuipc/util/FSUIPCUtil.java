@@ -31,7 +31,7 @@ public final class FSUIPCUtil {
 		while(mOffsetObj.find()) {
 			items.add(OffsetItem.from(mOffsetObj.group()));
 		}	
-		return items.toArray(new OffsetItem[] { });
+		return items.toArray(new OffsetItem[items.size()]);
 	}
 
     /**
@@ -49,7 +49,7 @@ public final class FSUIPCUtil {
 		while(mOffsetObj.find()) {
 			items.add(OffsetIdent.from(mOffsetObj.group()));
 		}	
-		return items.toArray(new OffsetIdent[] { });
+		return items.toArray(new OffsetIdent[items.size()]);
 	}
 	
 	/* */
