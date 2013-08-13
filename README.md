@@ -14,7 +14,7 @@ Java library for FSUIPC which is based on the java implementation of the [FSUIPC
     fsuipcInterface.open();
     // ..
     // write flaps offset value
-    fsuipcInterface.write(new OffsetItem(0x0BDC, 4, DataTypeUtil.toByteArray(0, 4)));
+    fsuipcInterface.write(new OffsetItem(0x0BDC, 4, ByteArray.create("0", 4)));
     // ..
     // read flaps offset value
     byte[] value = fsuipcInterface.read(new OffsetIdent(0x0BDC, 4));

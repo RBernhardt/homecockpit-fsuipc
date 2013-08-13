@@ -1,0 +1,5 @@
+include ':example'
+include ':fsuipc'
+
+project(':example').buildFileName = 'build.gradle'
+project(':fsuipc').buildFileName = 'build.gradle'

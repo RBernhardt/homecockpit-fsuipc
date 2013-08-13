@@ -1,0 +1,22 @@
+apply plugin: 'application'
+
+archivesBaseName = 'fsuipc-example'
+
+dependencies {
+    compile project(":fsuipc")
+    compile "org.slf4j:slf4j-simple:1.7.5"
+}
+
+mainClassName = "de.newsarea.homecockpit.fsuipc.example.CommandLineRunner"
+
+task copyLibs(type: Copy) {
+    from configurations.compile {
+        include '**/*.dll'
+    }
+    into "$buildDir/nativelib"
+}
+
+run {
+    dependsOn copyLibs
+    jvmArgs "-Djava.library.path=$buildDir/nativelib"
+}
