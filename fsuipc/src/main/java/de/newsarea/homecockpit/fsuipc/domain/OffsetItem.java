@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 public class OffsetItem extends OffsetIdent {
 
-    public static final String REGEX_ITEM = "0x([A-F0-9]{4})\\s*:\\s*([0-9]+)\\s*:\\s*0x((?:[A-F0-9][A-F0-9])+)";
+    public static final String REGEX_ITEM = "0x([A-F0-9]{1,4})\\s*:\\s*([0-9]+)\\s*:\\s*0x((?:[A-F0-9][A-F0-9])+)";
 	
 	private final ByteArray value;
 

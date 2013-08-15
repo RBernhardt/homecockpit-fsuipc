@@ -31,6 +31,9 @@ public class OffsetIdentTest {
     @Test
     public void shouldReturnToString() throws Exception {
         assertEquals("0x3213 : 4", OffsetIdent.fromString("0x3213 : 4").toString());
+        assertEquals("0x0321 : 4", OffsetIdent.fromString("0x321 : 4").toString());
+        assertEquals("0x0032 : 4", OffsetIdent.fromString("0x32 : 4").toString());
+        assertEquals("0x0003 : 4", OffsetIdent.fromString("0x3 : 4").toString());
     }
 
 }

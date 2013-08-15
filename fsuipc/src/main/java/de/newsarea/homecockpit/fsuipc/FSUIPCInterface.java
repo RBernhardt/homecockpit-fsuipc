@@ -10,7 +10,6 @@ public interface FSUIPCInterface {
 	
 	void open() throws ConnectException;
 
-	void monitor(OffsetIdent[] offsetIdents);
 	void monitor(OffsetIdent offsetIdent);
 
 	void write(OffsetItem[] offsetItems);

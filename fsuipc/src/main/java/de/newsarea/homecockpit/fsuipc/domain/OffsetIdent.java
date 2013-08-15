@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 
 public class OffsetIdent {
 
-    public static final String REGEX_ITEM = "0x([A-F0-9]{4})\\s*:\\s*([0-9]+)";
+    public static final String REGEX_ITEM = "0x([A-F0-9]{1,4})\\s*:\\s*([0-9]+)";
 	
 	private final int offset;
 	private final int size;
