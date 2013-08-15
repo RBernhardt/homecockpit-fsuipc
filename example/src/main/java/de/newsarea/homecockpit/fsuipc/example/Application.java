@@ -10,8 +10,8 @@ import java.net.ConnectException;
 public class Application {
 
     public static void main(String[] args) throws InterruptedException, ConnectException {
-        Application commandLineRunner = new Application();
-        commandLineRunner.run();
+        Application app = new Application();
+        app.run();
     }
 
     void run() throws ConnectException {
