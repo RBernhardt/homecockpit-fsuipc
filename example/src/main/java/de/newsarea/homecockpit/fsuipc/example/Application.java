@@ -1,7 +1,7 @@
 package de.newsarea.homecockpit.fsuipc.example;
 
 import de.newsarea.homecockpit.fsuipc.FSUIPCInterface;
-import de.newsarea.homecockpit.fsuipc.flightsim.FSUIPCFlightSimInterface;
+import de.newsarea.homecockpit.fsuipc.example.net.FSUIPCKryonetInterface;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -10,12 +10,14 @@ import java.net.ConnectException;
 public class Application {
 
     public static void main(String[] args) throws InterruptedException, ConnectException {
+        //FSUIPCInterface fsuipcInterface = FSUIPCFlightSimInterface.getInstance();
+        FSUIPCInterface fsuipcInterface = new FSUIPCKryonetInterface("10.211.55.3", 4020);
+        // ~
         Application app = new Application();
-        app.run();
+        app.run(fsuipcInterface);
     }
 
-    void run() throws ConnectException {
-        final FSUIPCInterface fsuipcInterface = FSUIPCFlightSimInterface.getInstance();
+    private void run(final FSUIPCInterface fsuipcInterface) throws ConnectException {
         fsuipcInterface.open();
         // ~
         FSUIPCSwingUI fsuipSwingUI = new FSUIPCSwingUI(fsuipcInterface);
