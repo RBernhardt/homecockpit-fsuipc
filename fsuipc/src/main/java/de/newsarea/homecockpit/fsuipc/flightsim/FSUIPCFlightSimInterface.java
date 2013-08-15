@@ -10,12 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.ConnectException;
-import java.util.EventListener;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 
@@ -49,23 +45,19 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
             throw new ConnectException(ex.getMessage());
         }
 	}
-	
-	public void monitor(OffsetIdent[] offsetIdents) {
-		for(OffsetIdent offsetIdent : offsetIdents) {
-			monitorOffsetThread.monitorOffset(offsetIdent);
-		}
-	}
-	
+
+    @Override
 	public void monitor(OffsetIdent offsetIdent) {
-		monitor(new OffsetIdent[] { offsetIdent });
+        monitorOffsetThread.monitorOffset(offsetIdent);
 	}
 	
 	public void write(OffsetItem[] offsetItems) {
 		int firstOffset = offsetItems[0].getOffset();
-		byte[] data = this.createByteArray(offsetItems);
-        ByteArray byteArray = ByteArray.create(data);
-		log.debug(firstOffset + " : " + byteArray.getSize() + " : " + byteArray.toString());
-		write(new OffsetItem(firstOffset, data.length, byteArray));
+        ByteArray byteArray = ByteArray.create(createByteArray(offsetItems));
+        // ~
+        OffsetItem offsetItem = new OffsetItem(firstOffset, byteArray.getSize(), byteArray);
+		log.debug(offsetItem.toString());
+        write(offsetItem);
 	}
 	
 	public void write(OffsetItem offsetItem) {
@@ -98,59 +90,55 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 
 	private static class MonitorOffsetThread extends Thread implements EventListener {
 
-		private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
-		private final Lock readLock = rwLock.readLock();
-		private final Lock writeLock = rwLock.writeLock();
-
-		private final EventListenerSupport<OffsetEventListener> eventListeners;
-
 		private final FSUIPCFlightSimInterface fsuipcFlightSimInterface;
+
 		private final Map<String, OffsetIdent> monitorOffsetList;
 		private final Map<Integer, ByteArray> offsetValues;
+        private final EventListenerSupport<OffsetEventListener> offsetEventListeners;
+
 		private boolean exit = false;
 
 		public MonitorOffsetThread(FSUIPCFlightSimInterface fsuipcFlightSimInterface) {
 			this.fsuipcFlightSimInterface = fsuipcFlightSimInterface;
-			this.monitorOffsetList = new HashMap<>();
+			this.monitorOffsetList = new ConcurrentHashMap<>();
 			this.offsetValues = new HashMap<>();
-            this.eventListeners = EventListenerSupport.create(OffsetEventListener.class);
-		}
+            this.offsetEventListeners = EventListenerSupport.create(OffsetEventListener.class);
+        }
 
 		public void run() {
 			try {
 				while (!exit) {
-					// lock mutex
-					readLock.lock();
-					//
-					try {
-						// iterate monitor offsets
-						for (OffsetIdent monitorOffsetIdent : monitorOffsetList.values()) {
-							if (exit) {
-								break;
-							}
-							//
-							int mOffset = monitorOffsetIdent.getOffset();
-							OffsetItem newOffsetItem = fsuipcFlightSimInterface.read(new OffsetIdent(mOffset, monitorOffsetIdent.getSize()));
-							// determine old offset value
-							ByteArray oldOffsetValue = null;
-							if (offsetValues.containsKey(mOffset)) {
-								oldOffsetValue = offsetValues.get(mOffset);
-							}
-							// send new offset value
-							if (!newOffsetItem.getValue().equals(oldOffsetValue)) {
-								eventListeners.fire().offsetValueChanged(newOffsetItem);
-							}
-							// save new offset value
-							if (offsetValues.containsKey(mOffset)) {
-								offsetValues.remove(mOffset);
-							}
-							offsetValues.put(mOffset, newOffsetItem.getValue());
-						}
-					} finally {
-						// unlock mutex
-						readLock.unlock();
-					}
-					Thread.sleep(1);
+                    List<OffsetItem> offsetItemGroup = new ArrayList<>();
+                    // iterate monitor offsets
+                    for (OffsetIdent monitorOffsetIdent : monitorOffsetList.values()) {
+                        if (exit) {
+                            break;
+                        }
+                        //
+                        int mOffset = monitorOffsetIdent.getOffset();
+                        final OffsetItem newOffsetItem = fsuipcFlightSimInterface.read(new OffsetIdent(mOffset, monitorOffsetIdent.getSize()));
+                        // determine old offset value
+                        ByteArray oldOffsetValue = null;
+                        if (offsetValues.containsKey(mOffset)) {
+                            oldOffsetValue = offsetValues.get(mOffset);
+                        }
+                        // send new offset value
+                        if (!newOffsetItem.getValue().equals(oldOffsetValue)) {
+                            offsetItemGroup.add(newOffsetItem);
+                            offsetEventListeners.fire().offsetValueChanged(newOffsetItem);
+                        }
+                        // save new offset value
+                        if (offsetValues.containsKey(mOffset)) {
+                            offsetValues.remove(mOffset);
+                        }
+                        offsetValues.put(mOffset, newOffsetItem.getValue());
+                    }
+                    //
+                    if(offsetItemGroup.size() > 0) {
+                        offsetEventListeners.fire().offsetValuesChanged(offsetItemGroup);
+                    }
+                    // ~
+					Thread.sleep(0, 1);
 				}
 			} catch (InterruptedException e) {
 				log.error(e.getMessage(), e);
@@ -158,15 +146,10 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 		}
 
 		public void monitorOffset(OffsetIdent offsetIdent) {
-			writeLock.lock();
-			try {
-				if(!monitorOffsetList.containsKey(offsetIdent.toString())) {
-					log.debug("monitor offset - " + offsetIdent.toString());
-					monitorOffsetList.put(offsetIdent.toString(), offsetIdent);
-				}
-			} finally { 
-				writeLock.unlock();
-			}
+            if(!monitorOffsetList.containsKey(offsetIdent.getIdentifier())) {
+                log.debug("monitor offset - " + offsetIdent.toString());
+                monitorOffsetList.put(offsetIdent.getIdentifier(), offsetIdent);
+            }
 		}
 
 		public void exit() {
@@ -174,7 +157,7 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 		}
 
 		public void addEventListener(OffsetEventListener offsetEventListener) {
-			eventListeners.addListener(offsetEventListener);
+			offsetEventListeners.addListener(offsetEventListener);
 		}
 
 	}

@@ -10,7 +10,11 @@ import org.testng.annotations.Test;
 
 import java.net.ConnectException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -25,7 +29,7 @@ public class FSUIPCFlightSimInterfaceTest {
     private List<OffsetItem> lastWriteOffsetItems;
 
     @BeforeMethod
-    public void before() {
+    public void beforeMethod() {
         lastWriteOffsetItems = new ArrayList<>();
         //
         flightSimWrapper = mock(FSUIPCFlightSimWrapper.class);
@@ -67,7 +71,7 @@ public class FSUIPCFlightSimInterfaceTest {
     }
 
     @Test
-    public void shouldWriteMultipleValidItem() {
+    public void shouldWriteMultipleValidItems() {
         OffsetItem[] offsetItemBlock = new OffsetItem[] {
                 new OffsetItem(1000, 4, new byte[] { 4, 4, 4, 4 }),
                 new OffsetItem(1004, 1, new byte[] { 1 }),
@@ -83,8 +87,36 @@ public class FSUIPCFlightSimInterfaceTest {
         assertEquals(ByteArray.create(new byte[]{4, 4, 4, 4, 1, 5, 5, 5, 5, 5, 2, 2}), wOffsetItem.getValue());
     }
 
+    @Test
+    public void shouldMonitorManyOffsetIdents() throws InterruptedException, ConnectException {
+        when(flightSimWrapper.read(anyInt(), anyInt())).thenReturn(new byte[]{(byte) 0xFF});
+        fsuipcFlightSimInterface.open();
+        //
+        final List<Exception> exceptions = Collections.synchronizedList(new ArrayList<Exception>());
+        ExecutorService executorService = Executors.newFixedThreadPool(100);
+        for(int i=0; i < 100; i++) {
+            executorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        for(int i=0; i < 1000; i++) {
+                            fsuipcFlightSimInterface.monitor(new OffsetIdent(i, 2));
+                            Thread.sleep(0, 1);
+                        }
+                    } catch (Exception ex) {
+                        exceptions.add(ex);
+                    }
+                }
+            });
+        }
+        executorService.shutdown();
+        executorService.awaitTermination(1, TimeUnit.HOURS);
+        // ~
+        assertEquals(0, exceptions.size());
+    }
+
     @Test(expectedExceptions = IllegalArgumentException.class)
-    public void shouldWriteMultipleItem_InvalidUnsort() {
+    public void shouldWriteMultipleItem_InvalidSort() {
         OffsetItem[] offsetItemBlock = new OffsetItem[] {
                 new OffsetItem(0x1000, 4, new byte[] { 4, 4, 4, 4 }),
                 new OffsetItem(0x1004, 1, new byte[] { 1 }),

@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Date;
 
 public class FSUIPCServer {
@@ -50,6 +51,11 @@ public class FSUIPCServer {
                         log.error(e.getMessage(), e);
                     }
                 }
+            }
+
+            @Override
+            public void offsetValuesChanged(Collection<OffsetItem> offsetItemCollection) {
+                //To change body of implemented methods use File | Settings | File Templates.
             }
         });
     }
