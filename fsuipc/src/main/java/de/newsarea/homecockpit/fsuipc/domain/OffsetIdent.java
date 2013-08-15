@@ -25,7 +25,11 @@ public class OffsetIdent {
 	}
 
 	public String getIdentifier() {
-		return toString();
+        StringBuilder strBld = new StringBuilder();
+        strBld.append(ByteArray.create(String.valueOf(offset), 2).toHexString());
+        strBld.append(" : ");
+        strBld.append(getSize());
+        return strBld.toString();
 	}
 
     public static OffsetIdent fromString(String value) {
