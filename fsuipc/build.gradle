@@ -1,6 +1,6 @@
 apply plugin: 'signing'
 
-archivesBaseName = 'de.newsarea.homecockpit.fsuipc'
+archivesBaseName = 'fsuipc'
 
 dependencies {
     compile "org.slf4j:slf4j-api:1.7.5"
