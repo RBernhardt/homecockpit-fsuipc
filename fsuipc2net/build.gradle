@@ -1,0 +1,51 @@
+apply plugin: 'application'
+
+archivesBaseName = 'fsuipc2net'
+
+mainClassName = "de.newsarea.homecockpit.fsuipc2net.Application"
+
+dependencies {
+    compile project(":fsuipc")
+    compile files("lib/kryonet-2.18-all.jar")
+    compile "org.slf4j:slf4j-api:1.7.5"
+    compile "org.springframework:spring-context:3.1.1.RELEASE"
+    runtime "org.slf4j:slf4j-log4j12:1.7.5"
+    runtime "log4j:log4j:1.2.17"
+    testCompile "org.slf4j:slf4j-simple:1.7.5"
+    testCompile "org.mockito:mockito-all:1.9.5"
+    testCompile "org.testng:testng:6.8.5"
+}
+
+task copyLibs(type: Copy) {
+    from configurations.compile {
+        include '**/*.dll'
+    }
+    into "$buildDir/nativelib"
+}
+
+run {
+    dependsOn copyLibs
+    jvmArgs "-Djava.library.path=$buildDir/nativelib"
+}
+
+/* */
+
+task applicationDistributionConfig {
+    outputs.dir "$buildDir/resources/main/config"
+}
+
+applicationDistribution.from(applicationDistributionConfig) {
+    into "config"
+}
+
+task applicationDistributionNativeLibs(dependsOn: copyLibs) {
+    outputs.dir "$buildDir/nativelib"
+}
+
+applicationDistribution.from(applicationDistributionNativeLibs) {
+    into "nativelib"
+}
+
+installApp {
+    destinationDir = file(distInstallPath)
+}
