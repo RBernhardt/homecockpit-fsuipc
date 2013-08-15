@@ -49,8 +49,7 @@ public class NetMessageItem {
         if (this == o) return true;
         if (!(o instanceof NetMessageItem)) return false;
         NetMessageItem item = (NetMessageItem) o;
-        if (!byteArray.equals(item.byteArray)) return false;
-        return offsetIdent.equals(item.offsetIdent);
+        return byteArray.equals(item.byteArray) && offsetIdent.equals(item.offsetIdent);
     }
 
     @Override

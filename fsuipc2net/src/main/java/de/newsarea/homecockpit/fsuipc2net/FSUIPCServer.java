@@ -54,7 +54,7 @@ public class FSUIPCServer {
         });
     }
 	
-	public void start() throws Exception {
+	public void start() {
 		log.info("net port: " + netServer.getPort());
 		try {
 			netServer.start();

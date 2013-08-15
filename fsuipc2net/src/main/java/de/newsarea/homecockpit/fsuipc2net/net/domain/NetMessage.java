@@ -71,8 +71,7 @@ public class NetMessage {
         if (this == o) return true;
         if (!(o instanceof NetMessage)) return false;
         NetMessage that = (NetMessage) o;
-        if (!items.equals(that.items)) return false;
-        return type == that.type;
+        return items.equals(that.items) && type == that.type;
     }
 
     @Override

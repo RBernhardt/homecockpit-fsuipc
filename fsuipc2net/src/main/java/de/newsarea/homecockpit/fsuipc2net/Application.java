@@ -18,10 +18,6 @@ public class Application {
 	private FSUIPCServer fsuipcServer;
 	private TrayIcon trayIcon;
 
-	/**
-	 * @param args
-	 * @throws Exception 
-	 */
 	public static void main(String[] args) throws Exception {
 		Application app = new Application();
 		app.start();
