@@ -1,57 +1,12 @@
 package de.newsarea.homecockpit.fsuipc.util;
 
-import de.newsarea.homecockpit.fsuipc.domain.OffsetIdent;
-import de.newsarea.homecockpit.fsuipc.domain.OffsetItem;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public final class FSUIPCUtil {
-	
-	private static final String REGEX_ITEMS = "\\[\\s*(.*?)\\s*\\]";
 
     private FSUIPCUtil() { }
 
-    /**
-     * use OffsetItem.from(String value)
-     */
-    @Deprecated
-	public static OffsetItem toOffsetItem(String value) {
-		return OffsetItem.from(value);
-	}
-
-	public static OffsetItem[] toOffsetItems(String value) {
-		List<OffsetItem> items = new ArrayList<>();
-		Pattern pOffsetObj = Pattern.compile(REGEX_ITEMS);
-		Matcher mOffsetObj = pOffsetObj.matcher(value);
-		while(mOffsetObj.find()) {
-			items.add(OffsetItem.from(mOffsetObj.group()));
-		}	
-		return items.toArray(new OffsetItem[items.size()]);
-	}
-
-    /**
-     * use OffsetIdent.from(String value)
-     */
-    @Deprecated
-	public static OffsetIdent toOffsetIdent(String value) {
-		return OffsetIdent.from(value);
-	}
-	
-	public static OffsetIdent[] toOffsetIdents(String value) {
-		List<OffsetIdent> items = new ArrayList<>();
-		Pattern pOffsetObj = Pattern.compile(REGEX_ITEMS);
-		Matcher mOffsetObj = pOffsetObj.matcher(value);
-		while(mOffsetObj.find()) {
-			items.add(OffsetIdent.from(mOffsetObj.group()));
-		}	
-		return items.toArray(new OffsetIdent[items.size()]);
-	}
-	
 	/* */
 	
 	public static long toFSUIPCLatitude(double latitude) {

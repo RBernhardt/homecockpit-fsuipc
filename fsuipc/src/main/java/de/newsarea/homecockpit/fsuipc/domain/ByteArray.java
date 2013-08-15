@@ -23,8 +23,7 @@ public final class ByteArray {
         return create(data, false);
     }
 
-    public static ByteArray create(String numberString, int size) {
-        BigInteger bigInt = new BigInteger(numberString);
+    public static ByteArray create(BigInteger bigInt, int size) {
         byte[] outputData = new byte[size];
         byte[] bigIntArray =  bigInt.toByteArray();
         for(int i=0; i < outputData.length; i++) {
@@ -34,6 +33,11 @@ public final class ByteArray {
             outputData[outputArrayIdx] = bigIntArray[bigIntArrayIdx];
         }
         return create(outputData);
+    }
+
+    public static ByteArray create(String numberString, int size) {
+        BigInteger bigInt = new BigInteger(numberString);
+        return create(bigInt, size);
     }
 
     public int getSize() {

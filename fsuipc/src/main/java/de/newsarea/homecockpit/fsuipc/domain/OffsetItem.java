@@ -1,10 +1,13 @@
 package de.newsarea.homecockpit.fsuipc.domain;
 
 
+import java.math.BigInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class OffsetItem extends OffsetIdent {
+
+    public static final String REGEX_ITEM = "0x([A-F0-9]{4})\\s*:\\s*([0-9]+)\\s*:\\s*0x((?:[A-F0-9][A-F0-9])+)";
 	
 	private final ByteArray value;
 
@@ -20,19 +23,25 @@ public class OffsetItem extends OffsetIdent {
     public OffsetItem(int offset, int size, ByteArray value) {
         super(offset, size);
         this.value = value;
+        //
+        if(size < value.getSize()) {
+            throw new IllegalArgumentException("size (" + size + ") is smaler than value length (" + value.getSize() + ")");
+        }
     }
 
 	public OffsetItem(int offset, int size, byte[] value) {
 		this(offset, size, ByteArray.create(value));
 	}
 
-    public static OffsetItem from(String value) {
-        Pattern p = Pattern.compile("([0-9]+)\\s*,\\s*([0-9]+)\\s*,\\s*([-0-9]+)");
+    public static OffsetItem fromString(String value) {
+        Pattern p = Pattern.compile(REGEX_ITEM);
         Matcher m = p.matcher(value);
         if(m.find()) {
-            int offset = Integer.parseInt(m.group(1));
+            short offset = Short.parseShort(m.group(1), 16);
             int size = Integer.parseInt(m.group(2));
-            ByteArray byteArray = ByteArray.create(m.group(3), size);
+            // create byte array
+            String byteArrayHex = m.group(3);
+            ByteArray byteArray = ByteArray.create(new BigInteger(byteArrayHex, 16), byteArrayHex.length() / 2);
             return new OffsetItem(offset, size, byteArray);
         }
         throw new IllegalArgumentException("invalid input - " + value);
@@ -57,12 +66,9 @@ public class OffsetItem extends OffsetIdent {
     @Override
 	public String toString() {
         StringBuilder strBld = new StringBuilder();
-		strBld.append(super.toString());
-		strBld.append(" : ");
-		strBld.append(getValue().toNumberString());
-		strBld.append(" (");
+        strBld.append(super.toString());
+        strBld.append(" : ");
 		strBld.append(getValue().toHexString());
-		strBld.append(")");
 		return strBld.toString();
 	}
 

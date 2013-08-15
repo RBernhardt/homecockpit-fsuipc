@@ -8,24 +8,29 @@ public class OffsetIdentTest {
 
     @Test
     public void shouldReturnIdent() throws Exception {
-        assertEquals("1 : 4", OffsetIdent.from("1, 4").getIdentifier());
+        assertEquals("0x0001 : 4", OffsetIdent.fromString("0x0001 : 4").getIdentifier());
     }
 
     @Test
     public void shouldCreateOffsetIdentFromString() throws Exception {
-        OffsetIdent oIdent = OffsetIdent.from("1, 4");
+        OffsetIdent oIdent = OffsetIdent.fromString("0x0001 : 4");
         assertEquals(1, oIdent.getOffset());
         assertEquals(4, oIdent.getSize());
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
-    public void shouldNotCreateOffsetIdentFromString() throws Exception {
-        OffsetIdent.from("XXXXX");
+    public void shouldNotCreateOffsetIdentFromString_Invalid() throws Exception {
+        OffsetItem.fromString("XXXXX");
+    }
+
+    @Test(expectedExceptions = IllegalArgumentException.class)
+    public void shouldNotCreateOffsetIdentFromString_ToBigOffsetValue() throws Exception {
+        OffsetItem.fromString("0x00001 : 1");
     }
 
     @Test
     public void shouldReturnToString() throws Exception {
-        assertEquals("0x00000C8D (3213) : 4", OffsetIdent.from("3213, 4").toString());
+        assertEquals("0x3213 : 4", OffsetIdent.fromString("0x3213 : 4").toString());
     }
 
 }

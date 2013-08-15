@@ -34,10 +34,9 @@ public class FSUIPCFlightSimInterfaceTest {
         doAnswer(new Answer<Object>() {
             public Object answer(InvocationOnMock invocation) {
                 Object[] args = invocation.getArguments();
-                lastWriteOffsetItems.add(new OffsetItem((Integer)args[0], (Integer)args[1], (byte[])args[2]));
+                lastWriteOffsetItems.add(new OffsetItem((int)args[0], (int)args[1], (byte[])args[2]));
                 return null;
-            }})
-                .when(flightSimWrapper).write(anyInt(), anyInt(), any(byte[].class));
+            }}).when(flightSimWrapper).write(anyInt(), anyInt(), any(byte[].class));
     }
 
     @Test
@@ -53,8 +52,8 @@ public class FSUIPCFlightSimInterfaceTest {
 
     @Test
     public void shouldRead() {
-        when(flightSimWrapper.read(1010, 4)).thenReturn(new byte[] { 1 });
-        assertEquals(new OffsetItem(1010, 4, ByteArray.create("1", 1)), fsuipcFlightSimInterface.read(new OffsetIdent(1010, 4)));
+        when(flightSimWrapper.read(1010, 1)).thenReturn(new byte[] { 1 });
+        assertEquals(new OffsetItem(1010, 1, ByteArray.create("1", 1)), fsuipcFlightSimInterface.read(new OffsetIdent(1010, 1)));
     }
 
     @Test
@@ -87,11 +86,11 @@ public class FSUIPCFlightSimInterfaceTest {
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void shouldWriteMultipleItem_InvalidUnsort() {
         OffsetItem[] offsetItemBlock = new OffsetItem[] {
-                new OffsetItem(1000, 4, new byte[] { 4, 4, 4, 4 }),
-                new OffsetItem(1004, 1, new byte[] { 1 }),
-                new OffsetItem(1010, 2, new byte[] { 2, 2 }),
-                new OffsetItem(1005, 5, new byte[] { 5, 5, 5, 5, 5}),
-                new OffsetItem(1001, 1, new byte[] { 1 }),
+                new OffsetItem(0x1000, 4, new byte[] { 4, 4, 4, 4 }),
+                new OffsetItem(0x1004, 1, new byte[] { 1 }),
+                new OffsetItem(0x1010, 2, new byte[] { 2, 2 }),
+                new OffsetItem(0x1005, 5, new byte[] { 5, 5, 5, 5, 5}),
+                new OffsetItem(0x1001, 1, new byte[] { 1 }),
         };
         //
         fsuipcFlightSimInterface.write(offsetItemBlock);
@@ -100,8 +99,8 @@ public class FSUIPCFlightSimInterfaceTest {
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void shouldWriteMultipleItem_InvalidGap() {
         OffsetItem[] offsetItemBlock = new OffsetItem[] {
-                new OffsetItem(1000, 4, new byte[4]),
-                new OffsetItem(1005, 1, new byte[1]),
+                new OffsetItem(0x1000, 4, new byte[4]),
+                new OffsetItem(0x1005, 1, new byte[1]),
         };
         //
         fsuipcFlightSimInterface.write(offsetItemBlock);

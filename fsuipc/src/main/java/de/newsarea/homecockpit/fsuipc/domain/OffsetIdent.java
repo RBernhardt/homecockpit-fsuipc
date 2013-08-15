@@ -5,10 +5,12 @@ import java.util.regex.Pattern;
 
 
 public class OffsetIdent {
+
+    public static final String REGEX_ITEM = "0x([A-F0-9]{4})\\s*:\\s*([0-9]+)";
 	
 	private final int offset;
 	private final int size;
-	
+
 	public int getOffset() {
 		return this.offset;
 	}
@@ -23,14 +25,14 @@ public class OffsetIdent {
 	}
 
 	public String getIdentifier() {
-		return this.getOffset() + " : " + this.getSize();
+		return toString();
 	}
 
-    public static OffsetIdent from(String value) {
-        Pattern p = Pattern.compile("([0-9]+)\\s*,\\s*([0-9]+)\\s*");
+    public static OffsetIdent fromString(String value) {
+        Pattern p = Pattern.compile(REGEX_ITEM);
         Matcher m = p.matcher(value);
         if(m.find()) {
-            int offset = Integer.parseInt(m.group(1));
+            int offset = Integer.parseInt(m.group(1), 16);
             int size = Integer.parseInt(m.group(2));
             //
             return new OffsetIdent(offset, size);
@@ -56,10 +58,7 @@ public class OffsetIdent {
     @Override
 	public String toString() {
 		StringBuilder strBld = new StringBuilder();
-		strBld.append(ByteArray.create(String.valueOf(offset), 4).toHexString());
-		strBld.append(" (");
-		strBld.append(getOffset());
-		strBld.append(")");
+		strBld.append(ByteArray.create(String.valueOf(offset), 2).toHexString());
 		strBld.append(" : ");
 		strBld.append(getSize());
 		return strBld.toString();
