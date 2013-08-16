@@ -38,12 +38,25 @@ public class KryoNetServer implements NetServer {
             server = new Server();
             server.start();
             server.addListener(new Listener() {
+                @Override
                 public void received (Connection connection, Object object) {
                     if(object instanceof String) {
                         Client client = new Client(String.valueOf(connection.getID()));
                         NetMessage message = NetMessage.fromString((String)object);
                         eventListeners.fire().valueReceived(client, message);
                     }
+                }
+
+                @Override
+                public void connected(Connection connection) {
+                    Client client = new Client(String.valueOf(connection.getID()));
+                    eventListeners.fire().clientConneted(client);
+                }
+
+                @Override
+                public void disconnected(Connection connection) {
+                    Client client = new Client(String.valueOf(connection.getID()));
+                    eventListeners.fire().clientDisconnected(client);
                 }
             });
             server.bind(port);

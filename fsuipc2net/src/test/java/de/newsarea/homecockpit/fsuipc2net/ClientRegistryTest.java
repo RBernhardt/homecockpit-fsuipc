@@ -1,14 +1,13 @@
 package de.newsarea.homecockpit.fsuipc2net;
 
 import de.newsarea.homecockpit.fsuipc.domain.OffsetIdent;
+import de.newsarea.homecockpit.fsuipc.domain.OffsetItem;
 import de.newsarea.homecockpit.fsuipc2net.net.domain.Client;
+import de.newsarea.homecockpit.fsuipc2net.net.domain.NetMessageItem;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -57,6 +56,43 @@ public class ClientRegistryTest {
         assertEquals(0, exceptions.size());
     }
 
+    @Test
+    public void shouldReturnClients() throws Exception {
+        clientRegistry.registerClientForOffsetEvent(new Client("1"), OffsetIdent.fromString("0x0001 : 4"));
+        clientRegistry.registerClientForOffsetEvent(new Client("1"), OffsetIdent.fromString("0x0001 : 4"));
+        clientRegistry.registerClientForOffsetEvent(new Client("2"), OffsetIdent.fromString("0x0001 : 2"));
+        clientRegistry.registerClientForOffsetEvent(new Client("2"), OffsetIdent.fromString("0x0001 : 4"));
+        clientRegistry.registerClientForOffsetEvent(new Client("3"), OffsetIdent.fromString("0x0001 : 4"));
+        //
+        assertEquals(3, clientRegistry.getClients().size());
+    }
 
+    @Test
+    public void shouldRemoveClient() throws Exception {
+        clientRegistry.registerClientForOffsetEvent(new Client("1"), OffsetIdent.fromString("0x0001 : 4"));
+        clientRegistry.registerClientForOffsetEvent(new Client("1"), OffsetIdent.fromString("0x0001 : 4"));
+        clientRegistry.registerClientForOffsetEvent(new Client("2"), OffsetIdent.fromString("0x0001 : 2"));
+        clientRegistry.registerClientForOffsetEvent(new Client("2"), OffsetIdent.fromString("0x0001 : 4"));
+        clientRegistry.registerClientForOffsetEvent(new Client("3"), OffsetIdent.fromString("0x0001 : 4"));
+        //
+        assertEquals(3, clientRegistry.getClients().size());
+        clientRegistry.deregisterClientForOffsetEvent(new Client("2"));
+        assertEquals(2, clientRegistry.getClients().size());
+    }
 
+    @Test
+    public void shouldReturnFilteredOffsets() throws Exception {
+        clientRegistry.registerClientForOffsetEvent(new Client("1"), OffsetIdent.fromString("0x0001 : 4"));
+        clientRegistry.registerClientForOffsetEvent(new Client("1"), OffsetIdent.fromString("0x0002 : 4"));
+        clientRegistry.registerClientForOffsetEvent(new Client("2"), OffsetIdent.fromString("0x0001 : 4"));
+        clientRegistry.registerClientForOffsetEvent(new Client("2"), OffsetIdent.fromString("0x0001 : 4"));
+        clientRegistry.registerClientForOffsetEvent(new Client("3"), OffsetIdent.fromString("0x0003 : 4"));
+        // ~
+        Collection<OffsetItem> offsetItems = new ArrayList<>();
+        offsetItems.add(OffsetItem.fromString("0x0001 : 4 : 0xFF"));
+        offsetItems.add(OffsetItem.fromString("0x0002 : 4 : 0xFF"));
+        // ~
+        Collection<NetMessageItem> filteredItems = clientRegistry.filterForClient(new Client("1"), offsetItems);
+        assertEquals(2, filteredItems.size());
+    }
 }

@@ -10,7 +10,6 @@ import de.newsarea.homecockpit.fsuipc.util.FSUIPCUtil;
 import javax.swing.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.util.Collection;
 
 class FSUIPCSwingUI extends JFrame {
 
@@ -62,13 +61,8 @@ class FSUIPCSwingUI extends JFrame {
     private void initializeFSUIPCInterface() {
         fsuipcInterface.addEventListener(new OffsetEventListener() {
             @Override
-            public void offsetValueChanged(OffsetItem offsetItem) {
+            public void valueChanged(OffsetItem offsetItem) {
                 handleOffsetValueChanged(offsetItem);
-            }
-
-            @Override
-            public void offsetValuesChanged(Collection<OffsetItem> offsetItemCollection) {
-                // do nothing
             }
         });
         fsuipcInterface.monitor(new OffsetIdent(0x0560, 8)); // latitude

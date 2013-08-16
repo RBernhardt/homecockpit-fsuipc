@@ -4,6 +4,7 @@ import de.newsarea.homecockpit.fsuipc.FSUIPCInterface;
 import de.newsarea.homecockpit.fsuipc.domain.ByteArray;
 import de.newsarea.homecockpit.fsuipc.domain.OffsetIdent;
 import de.newsarea.homecockpit.fsuipc.domain.OffsetItem;
+import de.newsarea.homecockpit.fsuipc.event.OffsetCollectionEventListener;
 import de.newsarea.homecockpit.fsuipc.event.OffsetEventListener;
 import org.apache.commons.lang3.event.EventListenerSupport;
 import org.slf4j.Logger;
@@ -86,6 +87,13 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 		monitorOffsetThread.addEventListener(offsetEventListener);
 	}
 
+    @Override
+    public void addEventListener(OffsetCollectionEventListener offsetCollectionEventListener) {
+        monitorOffsetThread.addEventListener(offsetCollectionEventListener);
+    }
+
+
+
 	/* */
 
 	private static class MonitorOffsetThread extends Thread implements EventListener {
@@ -95,6 +103,7 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 		private final Map<String, OffsetIdent> monitorOffsetList;
 		private final Map<Integer, ByteArray> offsetValues;
         private final EventListenerSupport<OffsetEventListener> offsetEventListeners;
+        private final EventListenerSupport<OffsetCollectionEventListener> offsetCollectionEventListeners;
 
 		private boolean exit = false;
 
@@ -103,6 +112,7 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 			this.monitorOffsetList = new ConcurrentHashMap<>();
 			this.offsetValues = new HashMap<>();
             this.offsetEventListeners = EventListenerSupport.create(OffsetEventListener.class);
+            this.offsetCollectionEventListeners = EventListenerSupport.create(OffsetCollectionEventListener.class);
         }
 
 		public void run() {
@@ -125,7 +135,7 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
                         // send new offset value
                         if (!newOffsetItem.getValue().equals(oldOffsetValue)) {
                             offsetItemGroup.add(newOffsetItem);
-                            offsetEventListeners.fire().offsetValueChanged(newOffsetItem);
+                            offsetEventListeners.fire().valueChanged(newOffsetItem);
                         }
                         // save new offset value
                         if (offsetValues.containsKey(mOffset)) {
@@ -135,7 +145,7 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
                     }
                     //
                     if(offsetItemGroup.size() > 0) {
-                        offsetEventListeners.fire().offsetValuesChanged(offsetItemGroup);
+                        offsetCollectionEventListeners.fire().valuesChanged(offsetItemGroup);
                     }
                     // ~
 					Thread.sleep(0, 1);
@@ -159,6 +169,10 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 		public void addEventListener(OffsetEventListener offsetEventListener) {
 			offsetEventListeners.addListener(offsetEventListener);
 		}
+
+        public void addEventListener(OffsetCollectionEventListener offsetCollectionEventListener) {
+            offsetCollectionEventListeners.addListener(offsetCollectionEventListener);
+        }
 
 	}
 

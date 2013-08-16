@@ -2,7 +2,7 @@ package de.newsarea.homecockpit.fsuipc2net;
 
 import de.newsarea.homecockpit.fsuipc.FSUIPCInterface;
 import de.newsarea.homecockpit.fsuipc.domain.OffsetItem;
-import de.newsarea.homecockpit.fsuipc.event.OffsetEventListener;
+import de.newsarea.homecockpit.fsuipc.event.OffsetCollectionEventListener;
 import de.newsarea.homecockpit.fsuipc2net.net.NetServer;
 import de.newsarea.homecockpit.fsuipc2net.net.domain.Client;
 import de.newsarea.homecockpit.fsuipc2net.net.domain.NetMessage;
@@ -23,12 +23,27 @@ public class FSUIPCServer {
 	private FSUIPCInterface fsuipcInterface;
     private ClientRegistry clientRegistry;
 
-    public FSUIPCServer(NetServer netServer, FSUIPCInterface fsuipcInterface, final ClientRegistry clientRegistry) {
+    public FSUIPCServer(final NetServer netServer, FSUIPCInterface fsuipcInterface, final ClientRegistry clientRegistry) {
         this.netServer = netServer;
         this.fsuipcInterface = fsuipcInterface;
         this.clientRegistry = clientRegistry;
         // ~
         netServer.addEventListener(new ServerEventListener() {
+            @Override
+            public void clientConneted(Client client) {
+                log.info("client connected - {}", client);
+            }
+
+            @Override
+            public void clientDisconnected(Client client) {
+                log.info("client disconnected - {}", client);
+                try {
+                    clientRegistry.deregisterClientForOffsetEvent(client);
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                }
+            }
+
             @Override
             public void valueReceived(Client client, NetMessage message) {
                 try {
@@ -39,23 +54,19 @@ public class FSUIPCServer {
             }
         });
         // ~
-        fsuipcInterface.addEventListener(new OffsetEventListener() {
+        fsuipcInterface.addEventListener(new OffsetCollectionEventListener() {
             @Override
-            public void offsetValueChanged(OffsetItem offsetItem) {
-                log.debug("offsetValueChanged - " + offsetItem);
-                for(Client client : clientRegistry.getClientIdsByOffsetEvent(offsetItem)) {
-                    log.debug("client ({}) available for offset: {}", client, offsetItem.getIdentifier());
-                    try {
-                        handleFSUIPCInput(client, offsetItem);
-                    } catch (Exception e) {
-                        log.error(e.getMessage(), e);
+            public void valuesChanged(Collection<OffsetItem> offsetItemCollection) {
+                try {
+                    Collection<Client> clients = clientRegistry.getClients();
+                    log.debug("FSUIPCInterface.valuesChanged - {}", offsetItemCollection);
+                    for(Client client : clients) {
+                        Collection<NetMessageItem> netMessageItems = clientRegistry.filterForClient(client, offsetItemCollection);
+                        handleFSUIPCInput(client, new NetMessage(NetMessage.Command.CHANGED, netMessageItems));
                     }
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
                 }
-            }
-
-            @Override
-            public void offsetValuesChanged(Collection<OffsetItem> offsetItemCollection) {
-                //To change body of implemented methods use File | Settings | File Templates.
             }
         });
     }
@@ -88,12 +99,8 @@ public class FSUIPCServer {
 		log.info("application stopped - " + new Date());
 	}
 
-    private void handleFSUIPCInput(Client client, OffsetItem offsetItem) {
-        try {
-            netServer.write(client, new NetMessage(NetMessage.Command.CHANGED, offsetItem));
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
+    private void handleFSUIPCInput(Client client, NetMessage message) throws IOException {
+        netServer.write(client, message);
     }
 
     private void handleNetServerInput(Client client, NetMessage message) {

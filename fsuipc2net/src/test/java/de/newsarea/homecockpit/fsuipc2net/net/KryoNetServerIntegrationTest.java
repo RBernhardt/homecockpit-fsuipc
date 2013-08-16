@@ -6,6 +6,7 @@ import de.newsarea.homecockpit.fsuipc2net.net.event.ServerEventListener;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.net.ConnectException;
 import java.util.ArrayList;
@@ -26,6 +27,16 @@ public class KryoNetServerIntegrationTest {
         // ~
         kryoNetServer = new KryoNetServer(PORT);
         kryoNetServer.addEventListener(new ServerEventListener() {
+            @Override
+            public void clientConneted(de.newsarea.homecockpit.fsuipc2net.net.domain.Client client) {
+                throw new NotImplementedException();
+            }
+
+            @Override
+            public void clientDisconnected(de.newsarea.homecockpit.fsuipc2net.net.domain.Client client) {
+                throw new NotImplementedException();
+            }
+
             @Override
             public void valueReceived(de.newsarea.homecockpit.fsuipc2net.net.domain.Client client, NetMessage message) {
                 messages.add(message);

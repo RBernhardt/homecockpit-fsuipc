@@ -25,7 +25,7 @@ public class NetMessageTest {
     @Test
     public void shouldCreateEqualObject() throws Exception {
         assertEquals(NetMessage.fromString("CHANGED[[0x0001:2:0x01]]"), NetMessage.fromString("CHANGED[[0x0001:2:0x01]]"));
-        assertEquals(NetMessage.fromString("CHANGED[[0x0001:2:0x01]]").getItems().get(0), new NetMessage(NetMessage.Command.CHANGED, new OffsetItem(1, 2, new byte[] { 1 })).getItems().get(0));
+        assertEquals(NetMessage.fromString("CHANGED[[0x0001:2:0x01]]").getItems().iterator().next(), new NetMessage(NetMessage.Command.CHANGED, new OffsetItem(1, 2, new byte[] { 1 })).getItems().iterator().next());
         assertEquals(NetMessage.fromString("CHANGED[[0x0001:2:0x01]]"), new NetMessage(NetMessage.Command.CHANGED, new OffsetItem(1, 2, new byte[] { 1 })));
     }
 

@@ -29,7 +29,6 @@ public class FSUIPCServerTest {
     private ClientRegistry clientRegistry;
     private EventListenerSupport<OffsetEventListener> offsetEventListenerList;
     private EventListenerSupport<ServerEventListener> serverEventListenerList;
-    private FSUIPCServer fsuipcServer;
 
     @BeforeMethod
     public void beforeMethod() throws Exception {
@@ -57,13 +56,13 @@ public class FSUIPCServerTest {
             }
         }).when(this.netServer).addEventListener(any(ServerEventListener.class));
         // ~
-        fsuipcServer = new FSUIPCServer(netServer, fsuipcInterface, clientRegistry);
+        new FSUIPCServer(netServer, fsuipcInterface, clientRegistry);
     }
 
     @Test
     public void shouldSendToClientId() throws Exception {
         when(clientRegistry.getClientIdsByOffsetEvent(any(OffsetIdent.class))).thenReturn(Arrays.asList(new Client("ClientId_1")));
-        offsetEventListenerList.fire().offsetValueChanged(new OffsetItem((short)0x0001, (byte)2, ByteArray.create(new byte[]{1})));
+        offsetEventListenerList.fire().valueChanged(new OffsetItem((short)0x0001, (byte)2, ByteArray.create(new byte[]{1})));
         // ~
         verify(netServer).write(eq(new Client("ClientId_1")), eq(NetMessage.fromString("CHANGED[[0x0001:2:0x01]]")));
     }
@@ -82,15 +81,15 @@ public class FSUIPCServerTest {
         Client client = new Client("Client_Id");
         serverEventListenerList.fire().valueReceived(client, netMessage);
         // ~
-        verify(clientRegistry).registerClientForOffsetEvent(eq(client), eq(netMessage.getItems().get(0).getOffsetIdent()));
-        verify(fsuipcInterface).monitor(eq(netMessage.getItems().get(0).getOffsetIdent()));
+        verify(clientRegistry).registerClientForOffsetEvent(eq(client), eq(netMessage.getItems().iterator().next().getOffsetIdent()));
+        verify(fsuipcInterface).monitor(eq(netMessage.getItems().iterator().next().getOffsetIdent()));
     }
 
     @Test
     public void shouldSendReadFromClient() throws Exception {
         NetMessage netMessage = NetMessage.fromString("READ[[0x0001:2]]");
         OffsetItem offsetItem = new OffsetItem(1,2, new byte[] { 12, 10 });
-        when(fsuipcInterface.read(eq(netMessage.getItems().get(0).getOffsetIdent()))).thenReturn(offsetItem);
+        when(fsuipcInterface.read(eq(netMessage.getItems().iterator().next().getOffsetIdent()))).thenReturn(offsetItem);
         // ~
         Client client = new Client("Client_Id");
         serverEventListenerList.fire().valueReceived(client, netMessage);

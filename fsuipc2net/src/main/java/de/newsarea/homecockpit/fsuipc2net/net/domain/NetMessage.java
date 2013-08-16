@@ -4,6 +4,8 @@ import de.newsarea.homecockpit.fsuipc.domain.OffsetIdent;
 import de.newsarea.homecockpit.fsuipc.domain.OffsetItem;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,13 +24,13 @@ public class NetMessage {
     }
 
     private final Command type;
-    private final List<NetMessageItem> items;
+    private final Collection<NetMessageItem> items;
 
     public Command getCommand() {
         return type;
     }
 
-    public List<NetMessageItem> getItems() {
+    public Collection<NetMessageItem> getItems() {
         return items;
     }
 
@@ -40,13 +42,13 @@ public class NetMessage {
         return offsetItems.toArray(new OffsetItem[items.size()]);
     }
 
-    public NetMessage(Command type, List<NetMessageItem> items) {
+    public NetMessage(Command type, Collection<NetMessageItem> items) {
         this.type = type;
         this.items = items;
     }
 
     public NetMessage(Command type, OffsetItem offsetItem) {
-        this(type, toList(new NetMessageItem(new OffsetIdent(offsetItem.getOffset(), offsetItem.getSize()), offsetItem.getValue())));
+        this(type, Arrays.asList(new NetMessageItem(new OffsetIdent(offsetItem.getOffset(), offsetItem.getSize()), offsetItem.getValue())));
     }
 
     public static NetMessage fromString(String message) {
@@ -92,12 +94,6 @@ public class NetMessage {
         }
         strBld.append("]");
         return strBld.toString();
-    }
-
-    private static List<NetMessageItem> toList(NetMessageItem netMessageItem) {
-        List<NetMessageItem> items = new ArrayList<>();
-        items.add(netMessageItem);
-        return items;
     }
 
 }

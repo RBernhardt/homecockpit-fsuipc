@@ -7,11 +7,11 @@ import de.newsarea.homecockpit.fsuipc.FSUIPCInterface;
 import de.newsarea.homecockpit.fsuipc.domain.ByteArray;
 import de.newsarea.homecockpit.fsuipc.domain.OffsetIdent;
 import de.newsarea.homecockpit.fsuipc.domain.OffsetItem;
+import de.newsarea.homecockpit.fsuipc.event.OffsetCollectionEventListener;
 import de.newsarea.homecockpit.fsuipc.event.OffsetEventListener;
 import org.apache.commons.lang3.event.EventListenerSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -29,6 +29,9 @@ public class FSUIPCKryonetInterface implements FSUIPCInterface {
     private static final Logger log = LoggerFactory.getLogger(FSUIPCKryonetInterface.class);
 
     private final EventListenerSupport<OffsetEventListener> offsetEventListeners;
+    private final EventListenerSupport<OffsetCollectionEventListener> offsetCollectionEventListeners;
+
+
     private final String server;
     private final int port;
     private final Client client;
@@ -43,18 +46,19 @@ public class FSUIPCKryonetInterface implements FSUIPCInterface {
             public void received (Connection connection, Object object) {
                 if(object instanceof String) {
                     String message = (String)object;
-                    log.info(message);
                     if(message.startsWith("CHANGED")) {
                         Collection<OffsetItem> offsetItems = toOffsetItems(message);
                         for(OffsetItem offsetItem : offsetItems) {
-                            offsetEventListeners.fire().offsetValueChanged(offsetItem);
+                            offsetEventListeners.fire().valueChanged(offsetItem);
                         }
+                        offsetCollectionEventListeners.fire().valuesChanged(offsetItems);
                     }
                 }
             }
         });
         // ~
         offsetEventListeners = EventListenerSupport.create(OffsetEventListener.class);
+        offsetCollectionEventListeners = EventListenerSupport.create(OffsetCollectionEventListener.class);
     }
 
     @Override
@@ -83,17 +87,17 @@ public class FSUIPCKryonetInterface implements FSUIPCInterface {
 
     @Override
     public void write(OffsetItem[] offsetItems) {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void write(OffsetItem offsetItem) {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public OffsetItem read(OffsetIdent offsetIdent) {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -102,8 +106,13 @@ public class FSUIPCKryonetInterface implements FSUIPCInterface {
     }
 
     @Override
-    public void addEventListener(OffsetEventListener valueEventListener) {
-        offsetEventListeners.addListener(valueEventListener);
+    public void addEventListener(OffsetEventListener offsetEventListener) {
+        offsetEventListeners.addListener(offsetEventListener);
+    }
+
+    @Override
+    public void addEventListener(OffsetCollectionEventListener offsetCollectionEventListener) {
+        offsetCollectionEventListeners.addListener(offsetCollectionEventListener);
     }
 
     /* HELPER */
@@ -116,11 +125,8 @@ public class FSUIPCKryonetInterface implements FSUIPCInterface {
             int offset = Integer.parseInt(m.group(1), 16);
             int size = Integer.parseInt(m.group(2));
             // ~
-            ByteArray byteArray = null;
             String byteArrayHex = m.group(3);
-            if(byteArrayHex != null) {
-                byteArray = ByteArray.create(new BigInteger(byteArrayHex, 16), byteArrayHex.length() / 2);
-            }
+            ByteArray byteArray = ByteArray.create(new BigInteger(byteArrayHex, 16), byteArrayHex.length() / 2);
             items.add(new OffsetItem(offset, size, byteArray));
         }
         return items;
