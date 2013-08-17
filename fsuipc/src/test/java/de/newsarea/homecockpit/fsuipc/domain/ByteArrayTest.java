@@ -12,6 +12,19 @@ public class ByteArrayTest {
     @Test
     public void shouldCreateLittleEndian() throws Exception {
         assertEquals(ByteArray.create(new byte[]{ 8, 7, 6, 5, 4, 3, 2, 1}), ByteArray.create(new byte[]{ 1, 2, 3, 4, 5, 6, 7, 8 }, true));
+        assertEquals("0x0807060504030201", ByteArray.create(new byte[]{ 8, 7, 6, 5, 4, 3, 2, 1}).toString());
+        assertEquals(8, ByteArray.create(new byte[]{ 8, 7, 6, 5, 4, 3, 2, 1}).get(0));
+    }
+
+    @Test
+    public void shouldReturnNewByteArray() throws Exception {
+        ByteArray byteArray = ByteArray.create(1000, 4);
+        assertEquals("0x000003E8", byteArray.toString());
+        byte[] bytes = byteArray.toByteArray();
+        assertEquals(-24, bytes[3]);
+        bytes[0] = 2;
+        assertEquals(2, bytes[0]);
+        assertEquals(-24, byteArray.get(3));
     }
 
     @Test

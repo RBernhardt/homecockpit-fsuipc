@@ -12,9 +12,9 @@ public final class ByteArray {
         this.data = data;
     }
 
-    public static ByteArray create(byte[] data, boolean littleEndian) {
-        if(littleEndian) {
-            return new ByteArray(toLittleEndian(data));
+    public static ByteArray create(byte[] data, boolean isLittleEndian) {
+        if(isLittleEndian) {
+            return new ByteArray(changeBitOrder(data));
         }
         return new ByteArray(data);
     }
@@ -38,6 +38,26 @@ public final class ByteArray {
     public static ByteArray create(String numberString, int size) {
         BigInteger bigInt = new BigInteger(numberString);
         return create(bigInt, size);
+    }
+
+    public static ByteArray create(long value, int size) {
+        return create(ByteBuffer.allocate(size).putLong(value).array());
+    }
+
+    public static ByteArray create(int value, int size) {
+        return create(ByteBuffer.allocate(size).putInt(value).array());
+    }
+
+    public static ByteArray create(float value, int size) {
+        return create(ByteBuffer.allocate(size).putFloat(value).array());
+    }
+
+    public static ByteArray create(double value, int size) {
+        return create(ByteBuffer.allocate(size).putDouble(value).array());
+    }
+
+    public static ByteArray create(Object value, int size) {
+        return create(value.toString(), size);
     }
 
     public int getSize() {
@@ -95,7 +115,21 @@ public final class ByteArray {
     }
 
     public byte[] toLittleEndian() {
-        return toLittleEndian(data);
+        return changeBitOrder(data);
+    }
+
+    public byte[] toByteArray() {
+        ByteBuffer byteBuffer = ByteBuffer.allocate(data.length);
+        byteBuffer.put(data);
+        return byteBuffer.array();
+    }
+
+    private static byte[] changeBitOrder(byte[] data) {
+        byte[] out = new byte[data.length];
+        for(int i=0; i < data.length; i++) {
+            out[data.length - i - 1] = data[i];
+        }
+        return out;
     }
 
     public boolean isHighBit(int idx) {
@@ -137,23 +171,13 @@ public final class ByteArray {
         return "0x" + strBld.toString();
     }
 
-    @Override
-    public String toString() {
-        return toHexString();
-    }
-
     public String toNumberString() {
         return toBigInteger().toString();
     }
 
-    /* */
-
-    private static byte[] toLittleEndian(byte[] data) {
-        byte[] out = new byte[data.length];
-        for(int i=0; i < data.length; i++) {
-            out[data.length - i - 1] = data[i];
-        }
-        return out;
+    @Override
+    public String toString() {
+        return toHexString();
     }
 
 }
