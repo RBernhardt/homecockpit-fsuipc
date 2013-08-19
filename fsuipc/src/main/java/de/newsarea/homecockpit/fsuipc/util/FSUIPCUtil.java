@@ -1,5 +1,7 @@
 package de.newsarea.homecockpit.fsuipc.util;
 
+import org.springframework.util.Assert;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -7,24 +9,44 @@ public final class FSUIPCUtil {
 
     private FSUIPCUtil() { }
 
-	/* */
-	
+    /***
+     * To convert to Degrees:
+     * If your compiler supports long long (64-bit) integers then use such a variable to simply copy this 64-bit value into a double floating point variable and multiply by 90.0/(10001750.0 * 65536.0 * 65536.0).
+     * Either way, a negative result is South, positive North.
+     * Die Breite kann Werte von 0° (am Äquator) bis ±90° (an den Polen) annehmen.
+     */
 	public static long toFSUIPCLatitude(double latitude) {
+        Assert.isTrue(latitude >= -90, "value is valid from 0 to ±90");
+        Assert.isTrue(latitude <= 90, "value is valid from 0 to ±90");
+        // ~
 		return (long)(latitude / (90D / (10001750D * 65536D * 65536D)));
 	}
-	
+
+    /***
+     * To convert to Degrees:
+     * If your compiler supports long long (64-bit) integers then use such a variable to simply copy this 64-bit value into a double floating point variable and multiply by 90.0/(10001750.0 * 65536.0 * 65536.0).
+     * Either way, a negative result is South, positive North.
+     */
 	public static double toLatitude(long fsuipcLatitude) {
-		// 42957189152768000
-		// 2,0951091487837894969942760016997e-15
 		return fsuipcLatitude * (90D / (10001750D * 65536D * 65536D));
 	}
 	
 	/* */
-	
+
+    /***
+     * To convert to Degrees:
+     * If your compiler supports long long (64-bit) integers then use such a variable to simply copy this 64-bit value into a double floating point variable and multiply by 360.0/(65536.0 * 65536.0 * 65536.0 * 65536.0).
+     * Either way, a negative result is West, positive East.
+     */
 	public static long toFSUIPCLongitude(double longitude) {
 		return (long)(longitude / (360.0 / (65536.0 * 65536.0 * 65536.0 * 65536.0)));
 	}
-	
+
+    /***
+     * To convert to Degrees:
+     * If your compiler supports long long (64-bit) integers then use such a variable to simply copy this 64-bit value into a double floating point variable and multiply by 360.0/(65536.0 * 65536.0 * 65536.0 * 65536.0).
+     * Either way, a negative result is West, positive East.
+     */
 	public static double toLongitude(long fsuipcLongitude) {
 		return (fsuipcLongitude * (360.0 / (65536.0 * 65536.0 * 65536.0 * 65536.0)));
 	}
