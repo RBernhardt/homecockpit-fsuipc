@@ -1,7 +1,5 @@
 package de.newsarea.homecockpit.fsuipc.util;
 
-import org.springframework.util.Assert;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
@@ -16,8 +14,8 @@ public final class FSUIPCUtil {
      * Die Breite kann Werte von 0° (am Äquator) bis ±90° (an den Polen) annehmen.
      */
 	public static long toFSUIPCLatitude(double latitude) {
-        Assert.isTrue(latitude >= -90, "value is valid from 0 to ±90");
-        Assert.isTrue(latitude <= +90, "value is valid from 0 to ±90");
+        if(latitude < -90) { throw new IllegalArgumentException("value is valid from 0 to ±90"); }
+        if(latitude > +90) { throw new IllegalArgumentException("value is valid from 0 to ±90"); }
         // ~
 		return (long)(latitude / (90D / (10001750D * 65536D * 65536D)));
 	}
@@ -40,8 +38,8 @@ public final class FSUIPCUtil {
      * Die geographische Länge ist ein Winkel, der ausgehend vom Nullmeridian (0°) bis 180° in östlicher und 180° in westlicher Richtung gemessen wird.
      */
 	public static long toFSUIPCLongitude(double longitude) {
-        Assert.isTrue(longitude >= -180, "value is valid from 0 to ±180");
-        Assert.isTrue(longitude <= +180, "value is valid from 0 to ±180");
+        if(longitude < -180) { throw new IllegalArgumentException("value is valid from 0 to ±180"); }
+        if(longitude > +180) { throw new IllegalArgumentException("value is valid from 0 to ±180"); }
         //
 		return (long)(longitude / (360.0 / (65536.0 * 65536.0 * 65536.0 * 65536.0)));
 	}
