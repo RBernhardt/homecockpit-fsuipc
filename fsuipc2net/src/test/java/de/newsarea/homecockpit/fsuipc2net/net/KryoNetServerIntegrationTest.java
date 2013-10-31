@@ -6,7 +6,6 @@ import de.newsarea.homecockpit.fsuipc2net.net.event.ServerEventListener;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.net.ConnectException;
 import java.util.ArrayList;
@@ -28,14 +27,10 @@ public class KryoNetServerIntegrationTest {
         kryoNetServer = new KryoNetServer(PORT);
         kryoNetServer.addEventListener(new ServerEventListener() {
             @Override
-            public void clientConneted(de.newsarea.homecockpit.fsuipc2net.net.domain.Client client) {
-                throw new NotImplementedException();
-            }
+            public void clientConneted(de.newsarea.homecockpit.fsuipc2net.net.domain.Client client) { }
 
             @Override
-            public void clientDisconnected(de.newsarea.homecockpit.fsuipc2net.net.domain.Client client) {
-                throw new NotImplementedException();
-            }
+            public void clientDisconnected(de.newsarea.homecockpit.fsuipc2net.net.domain.Client client) { }
 
             @Override
             public void valueReceived(de.newsarea.homecockpit.fsuipc2net.net.domain.Client client, NetMessage message) {
@@ -58,7 +53,7 @@ public class KryoNetServerIntegrationTest {
         client.connect(5000, "localhost", PORT);
         client.sendTCP("WRITE[[0x0001:2:0x5050][0xFF00:2:0x10]]");
         client.close();
-        Thread.sleep(100);
+        Thread.sleep(200);
         //
         assertEquals(1, messages.size());
         assertEquals("[WRITE[[0x0001:2:0x5050][0xFF00:2:0x10]]]", messages.toString());

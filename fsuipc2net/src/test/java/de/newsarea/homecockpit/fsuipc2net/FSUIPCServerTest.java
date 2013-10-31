@@ -2,12 +2,12 @@ package de.newsarea.homecockpit.fsuipc2net;
 
 import de.newsarea.homecockpit.fsuipc.FSUIPCInterface;
 import de.newsarea.homecockpit.fsuipc.domain.ByteArray;
-import de.newsarea.homecockpit.fsuipc.domain.OffsetIdent;
 import de.newsarea.homecockpit.fsuipc.domain.OffsetItem;
-import de.newsarea.homecockpit.fsuipc.event.OffsetEventListener;
+import de.newsarea.homecockpit.fsuipc.event.OffsetCollectionEventListener;
 import de.newsarea.homecockpit.fsuipc2net.net.NetServer;
 import de.newsarea.homecockpit.fsuipc2net.net.domain.Client;
 import de.newsarea.homecockpit.fsuipc2net.net.domain.NetMessage;
+import de.newsarea.homecockpit.fsuipc2net.net.domain.NetMessageItem;
 import de.newsarea.homecockpit.fsuipc2net.net.event.ServerEventListener;
 import org.apache.commons.lang3.event.EventListenerSupport;
 import org.mockito.invocation.InvocationOnMock;
@@ -16,6 +16,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
+import java.util.Collection;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -27,7 +28,7 @@ public class FSUIPCServerTest {
     private NetServer netServer;
     private FSUIPCInterface fsuipcInterface;
     private ClientRegistry clientRegistry;
-    private EventListenerSupport<OffsetEventListener> offsetEventListenerList;
+    private EventListenerSupport<OffsetCollectionEventListener> offsetCollectionEventListener;
     private EventListenerSupport<ServerEventListener> serverEventListenerList;
 
     @BeforeMethod
@@ -36,15 +37,15 @@ public class FSUIPCServerTest {
         this.fsuipcInterface = mock(FSUIPCInterface.class);
         this.clientRegistry = mock(ClientRegistry.class);
         // ~
-        offsetEventListenerList = EventListenerSupport.create(OffsetEventListener.class);
+        offsetCollectionEventListener = EventListenerSupport.create(OffsetCollectionEventListener.class);
         doAnswer(new Answer<Object>() {
             @Override
             public Object answer(InvocationOnMock invocation) throws Throwable {
                 Object[] args = invocation.getArguments();
-                offsetEventListenerList.addListener((OffsetEventListener) args[0]);
+                offsetCollectionEventListener.addListener((OffsetCollectionEventListener) args[0]);
                 return null;
             }
-        }).when(this.fsuipcInterface).addEventListener(any(OffsetEventListener.class));
+        }).when(this.fsuipcInterface).addEventListener(any(OffsetCollectionEventListener.class));
         // ~
         serverEventListenerList = EventListenerSupport.create(ServerEventListener.class);
         doAnswer(new Answer<Object>() {
@@ -61,10 +62,13 @@ public class FSUIPCServerTest {
 
     @Test
     public void shouldSendToClientId() throws Exception {
-        when(clientRegistry.getClientIdsByOffsetEvent(any(OffsetIdent.class))).thenReturn(Arrays.asList(new Client("ClientId_1")));
-        offsetEventListenerList.fire().valueChanged(new OffsetItem((short)0x0001, (byte)2, ByteArray.create(new byte[]{1})));
+        Client client = new Client("ClientId_1");
+        Collection<NetMessageItem> netMessageItems = Arrays.asList(NetMessageItem.fromString("0x0001:2:0x01"));
+        when(clientRegistry.getClients()).thenReturn(Arrays.asList(client));
+        when(clientRegistry.filterForClient(eq(client), anyCollectionOf(OffsetItem.class))).thenReturn(netMessageItems);
+        offsetCollectionEventListener.fire().valuesChanged(Arrays.asList(new OffsetItem((short) 0x0001, (byte) 2, ByteArray.create(new byte[]{1}))));
         // ~
-        verify(netServer).write(eq(new Client("ClientId_1")), eq(NetMessage.fromString("CHANGED[[0x0001:2:0x01]]")));
+        verify(netServer).write(any(Client.class), any(NetMessage.class));
     }
 
     @Test
