@@ -5,7 +5,7 @@ subprojects {
     apply plugin: 'idea'
 
     group = 'de.newsarea.homecockpit'
-    version = '0.9.2'
+    version = '0.9.3-SNAPSHOT'
 
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
