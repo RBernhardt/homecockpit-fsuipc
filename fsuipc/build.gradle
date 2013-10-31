@@ -90,6 +90,7 @@ uploadArchives {
     }
 }
 
+/*
 import org.gradle.plugins.signing.Sign
 
 gradle.taskGraph.whenReady { taskGraph ->
@@ -105,3 +106,4 @@ gradle.taskGraph.whenReady { taskGraph ->
         console.printf "\nThanks.\n\n"
     }
 }
+*/
