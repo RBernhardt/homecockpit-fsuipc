@@ -52,12 +52,12 @@ subprojects {
                 pom {
                     project {
                         packaging 'jar'
-                        url 'https://github.com/RBernhardt/homecockpit-de.newsarea.homecockpit.fsuipc'
+                        url 'https://github.com/RBernhardt/homecockpit-fsuipc'
 
                         scm {
-                            connection 'scm:git@github.com:RBernhardt/homecockpit-de.newsarea.homecockpit.fsuipc.git'
-                            developerConnection 'scm:git@github.com:RBernhardt/homecockpit-de.newsarea.homecockpit.fsuipc.git'
-                            url 'git@github.com:RBernhardt/homecockpit-de.newsarea.homecockpit.fsuipc.git'
+                            connection 'scm:git@github.com:RBernhardt/homecockpit-fsuipc.git'
+                            developerConnection 'scm:git@github.com:RBernhardt/homecockpit-fsuipc.git'
+                            url 'git@github.com:RBernhardt/homecockpit-fsuipc.git'
                         }
 
                         licenses {
@@ -70,7 +70,7 @@ subprojects {
 
                         developers {
                             developer {
-                                id 'rbernhardt'
+                                id 'bernhardt'
                                 name 'Robert Bernhardt'
                             }
                         }

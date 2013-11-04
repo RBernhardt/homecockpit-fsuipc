@@ -35,7 +35,7 @@ uploadArchives {
 
             pom {
                 project {
-                    name 'homecockpit-de.newsarea.homecockpit.fsuipc'
+                    name 'homecockpit-fsuipc'
                     description 'Java library for FSUIPC which is based on the java implementation of the FSUIPC SDK.'
                 }
             }
