@@ -21,3 +21,5 @@ run {
     dependsOn copyLibs
     jvmArgs "-Djava.library.path=$buildDir/nativelib"
 }
+
+uploadArchives.enabled = false
