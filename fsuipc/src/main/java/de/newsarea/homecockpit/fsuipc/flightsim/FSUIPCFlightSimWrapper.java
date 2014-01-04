@@ -1,6 +1,7 @@
 package de.newsarea.homecockpit.fsuipc.flightsim;
 
 import com.flightsim.fsuipc.fsuipc_wrapper;
+import de.newsarea.homecockpit.fsuipc.util.NativeLibraryLoader;
 
 /**
  * wrapper for better unit testing
@@ -8,6 +9,7 @@ import com.flightsim.fsuipc.fsuipc_wrapper;
 class FSUIPCFlightSimWrapper {
 
 	public void open() {
+        NativeLibraryLoader.loadNativeLibrary();
 		fsuipc_wrapper.Open(fsuipc_wrapper.SIM_ANY);
 	}
 	

@@ -10,16 +10,4 @@ dependencies {
     compile "org.slf4j:slf4j-simple:1.7.5"
 }
 
-task copyLibs(type: Copy) {
-    from configurations.compile {
-        include '**/*.dll'
-    }
-    into "$buildDir/nativelib"
-}
-
-run {
-    dependsOn copyLibs
-    jvmArgs "-Djava.library.path=$buildDir/nativelib"
-}
-
 uploadArchives.enabled = false
