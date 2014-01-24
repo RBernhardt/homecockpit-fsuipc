@@ -65,9 +65,9 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 	}
 	
 	public void write(OffsetItem offsetItem) {
-		log.debug("write offset item - " + offsetItem);
+		log.debug("write offset item - {}" + offsetItem);
 		fsuipcFlightSimWrapper.write(offsetItem.getOffset(), offsetItem.getSize(), offsetItem.getValue().toLittleEndian());
-		log.debug("offset item written - " + offsetItem);
+		log.debug("offset item written - {}" + offsetItem);
 	}
 
     @Override
@@ -75,10 +75,15 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
         byte[] value = fsuipcFlightSimWrapper.read(offset, size);
         int bidx = (byteIdx / 8);
         byte nidx = (byte)(byteIdx % 8);
-        byte newByteValue = value[value.length - 1 - bidx];
-        newByteValue ^= (1 << nidx);
-        value[value.length - 1 - bidx] = newByteValue;
-        fsuipcFlightSimWrapper.write(offset, size, value);
+        int arrayPositionIdx = value.length - 1 - bidx;
+        // set high bit
+        byte[] highByteArray = value.clone();
+        highByteArray[arrayPositionIdx] |= (1 << nidx);
+        fsuipcFlightSimWrapper.write(offset, size, highByteArray);
+        // set low bit
+        byte[] lowByteArray = value.clone();
+        lowByteArray[arrayPositionIdx] &= ~(1 << nidx);
+        fsuipcFlightSimWrapper.write(offset, size, lowByteArray);
     }
 
     public OffsetItem read(OffsetIdent offsetIdent) {

@@ -161,9 +161,10 @@ public class FSUIPCFlightSimInterfaceTest {
 
     @Test
     public void shouldToggleBitZero() throws Exception {
-        when(flightSimWrapper.read(0x0001, 1)).thenReturn(new byte[] { 0x00 });
+        when(flightSimWrapper.read(0x0001, 1)).thenReturn(new byte[] { (byte)0xF0 });
         fsuipcFlightSimInterface.toggleBit(0x0001, 1, (byte)0);
-        verify(flightSimWrapper).write(eq(0x0001), eq(1), eq(new byte[] { 0x01 }));
+        verify(flightSimWrapper).write(eq(0x0001), eq(1), eq(new byte[] { (byte)0xF1 }));
+        verify(flightSimWrapper).write(eq(0x0001), eq(1), eq(new byte[] { (byte)0xF0 }));
     }
 
     @Test
@@ -171,6 +172,7 @@ public class FSUIPCFlightSimInterfaceTest {
         when(flightSimWrapper.read(0x0001, 1)).thenReturn(new byte[] { 0x00 });
         fsuipcFlightSimInterface.toggleBit(0x0001, 1, (byte)6);
         verify(flightSimWrapper).write(eq(0x0001), eq(1), eq(new byte[] { 64 }));
+        verify(flightSimWrapper).write(eq(0x0001), eq(1), eq(new byte[] { 0 }));
     }
 
 }
