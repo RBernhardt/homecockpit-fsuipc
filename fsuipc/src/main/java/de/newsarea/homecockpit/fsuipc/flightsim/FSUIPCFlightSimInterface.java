@@ -11,7 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.ConnectException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EventListener;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class FSUIPCFlightSimInterface implements FSUIPCInterface {
@@ -112,7 +115,7 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 		private final FSUIPCFlightSimInterface fsuipcFlightSimInterface;
 
 		private final Map<String, OffsetIdent> monitorOffsetList;
-		private final Map<Integer, ByteArray> offsetValues;
+        private final ByteArray[] offsetValues;
         private final EventListenerSupport<OffsetEventListener> offsetEventListeners;
         private final EventListenerSupport<OffsetCollectionEventListener> offsetCollectionEventListeners;
 
@@ -121,7 +124,7 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 		public MonitorOffsetThread(FSUIPCFlightSimInterface fsuipcFlightSimInterface) {
 			this.fsuipcFlightSimInterface = fsuipcFlightSimInterface;
 			this.monitorOffsetList = new ConcurrentHashMap<>();
-			this.offsetValues = new HashMap<>();
+			this.offsetValues = new ByteArray[0x6000];
             this.offsetEventListeners = EventListenerSupport.create(OffsetEventListener.class);
             this.offsetCollectionEventListeners = EventListenerSupport.create(OffsetCollectionEventListener.class);
         }
@@ -139,20 +142,14 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
                         int mOffset = monitorOffsetIdent.getOffset();
                         final OffsetItem newOffsetItem = fsuipcFlightSimInterface.read(new OffsetIdent(mOffset, monitorOffsetIdent.getSize()));
                         // determine old offset value
-                        ByteArray oldOffsetValue = null;
-                        if (offsetValues.containsKey(mOffset)) {
-                            oldOffsetValue = offsetValues.get(mOffset);
-                        }
+                        ByteArray oldOffsetValue = offsetValues[mOffset];
                         // send new offset value
                         if (!newOffsetItem.getValue().equals(oldOffsetValue)) {
                             offsetItemGroup.add(newOffsetItem);
                             offsetEventListeners.fire().valueChanged(newOffsetItem);
                         }
                         // save new offset value
-                        if (offsetValues.containsKey(mOffset)) {
-                            offsetValues.remove(mOffset);
-                        }
-                        offsetValues.put(mOffset, newOffsetItem.getValue());
+                        offsetValues[mOffset] = newOffsetItem.getValue();
                     }
                     //
                     if(offsetItemGroup.size() > 0) {

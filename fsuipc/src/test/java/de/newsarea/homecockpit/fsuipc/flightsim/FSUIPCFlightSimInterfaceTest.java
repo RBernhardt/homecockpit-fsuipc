@@ -3,6 +3,7 @@ package de.newsarea.homecockpit.fsuipc.flightsim;
 import de.newsarea.homecockpit.fsuipc.domain.ByteArray;
 import de.newsarea.homecockpit.fsuipc.domain.OffsetIdent;
 import de.newsarea.homecockpit.fsuipc.domain.OffsetItem;
+import de.newsarea.homecockpit.fsuipc.event.OffsetEventListener;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.testng.annotations.BeforeMethod;
@@ -113,6 +114,26 @@ public class FSUIPCFlightSimInterfaceTest {
         executorService.awaitTermination(1, TimeUnit.HOURS);
         // ~
         assertEquals(0, exceptions.size());
+    }
+
+    @Test
+    public void shouldWriteOnlyNewValues() throws Exception {
+        // given
+        final List<OffsetItem> offsetItemList = new ArrayList<>();
+        when(flightSimWrapper.read(eq(0x0001), eq(1))).thenReturn(new byte[] { 0x0A });
+        fsuipcFlightSimInterface.addEventListener(new OffsetEventListener() {
+            @Override
+            public void valueChanged(OffsetItem offsetItem) {
+                offsetItemList.add(offsetItem);
+            }
+        });
+        // when
+        fsuipcFlightSimInterface.monitor(new OffsetIdent(0x0001, 1));
+        fsuipcFlightSimInterface.open();
+        Thread.sleep(100);
+        fsuipcFlightSimInterface.close();
+        // then
+        assertEquals(1, offsetItemList.size());
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
