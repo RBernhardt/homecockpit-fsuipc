@@ -96,6 +96,11 @@ public class FSUIPCKryonetInterface implements FSUIPCInterface {
     }
 
     @Override
+    public void toggleBit(int offset, int size, byte byteIdx) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public OffsetItem read(OffsetIdent offsetIdent) {
         throw new UnsupportedOperationException();
     }
