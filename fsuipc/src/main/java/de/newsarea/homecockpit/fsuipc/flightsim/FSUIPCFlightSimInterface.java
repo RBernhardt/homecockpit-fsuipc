@@ -67,7 +67,18 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 		log.debug("offset item written - " + offsetItem);
 	}
 
-	public OffsetItem read(OffsetIdent offsetIdent) {
+    @Override
+    public void toggleBit(int offset, int size, byte byteIdx) {
+        byte[] value = fsuipcFlightSimWrapper.read(offset, size);
+        int bidx = (byteIdx / 8);
+        byte nidx = (byte)(byteIdx % 8);
+        byte newByteValue = value[value.length - 1 - bidx];
+        newByteValue ^= (1 << nidx);
+        value[value.length - 1 - bidx] = newByteValue;
+        fsuipcFlightSimWrapper.write(offset, size, value);
+    }
+
+    public OffsetItem read(OffsetIdent offsetIdent) {
 		byte[] data = fsuipcFlightSimWrapper.read(offsetIdent.getOffset(), offsetIdent.getSize());
         ByteArray byteArray = ByteArray.create(data, true);
         return new OffsetItem(offsetIdent.getOffset(), offsetIdent.getSize(), byteArray);

@@ -16,6 +16,8 @@ public interface FSUIPCInterface {
 	void write(OffsetItem[] offsetItems);
 	void write(OffsetItem offsetItem);
 
+    void toggleBit(int offset, int size, byte byteIdx);
+
 	OffsetItem read(OffsetIdent offsetIdent);
 
 	void close();
