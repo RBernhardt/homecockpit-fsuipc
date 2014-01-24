@@ -27,15 +27,18 @@ public class FSUIPCServer {
     private ClientRegistry clientRegistry;
 
     private LinkedBlockingQueue<Object[]> clientMessageQueue;
+    private LinkedBlockingQueue<Collection<OffsetItem>> fsuipcMessageQueue;
 
     public FSUIPCServer(final NetServer netServer, FSUIPCInterface fsuipcInterface, final ClientRegistry clientRegistry) {
         this.netServer = netServer;
         this.fsuipcInterface = fsuipcInterface;
         this.clientRegistry = clientRegistry;
-        this.clientMessageQueue = new LinkedBlockingQueue<>();
         // ~
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
-        executorService.execute(new Runnable() {
+        this.clientMessageQueue = new LinkedBlockingQueue<>();
+        this.fsuipcMessageQueue = new LinkedBlockingQueue<>();
+        // ~
+        ExecutorService clientMessageExecutorService = Executors.newSingleThreadExecutor();
+        clientMessageExecutorService.execute(new Runnable() {
             @Override
             public void run() {
                 while(true) {
@@ -44,6 +47,25 @@ public class FSUIPCServer {
                         Client client = (Client) data[0];
                         NetMessage message = (NetMessage) data[1];
                         handleNetServerInput(client, message);
+                    } catch (Exception e) {
+                        log.error(e.getMessage(), e);
+                    }
+                }
+            }
+        });
+        // ~
+        ExecutorService fusipcMessageExecutorService = Executors.newSingleThreadExecutor();
+        fusipcMessageExecutorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                while(true) {
+                    try {
+                        Collection<OffsetItem> offsetItemCollection = fsuipcMessageQueue.take();
+                        log.debug("FSUIPCInterface.valuesChanged - {}", offsetItemCollection);
+                        for(Client client : clientRegistry.getClients()) {
+                            Collection<NetMessageItem> netMessageItems = clientRegistry.filterForClient(client, offsetItemCollection);
+                            handleFSUIPCInput(client, new NetMessage(NetMessage.Command.CHANGED, netMessageItems));
+                        }
                     } catch (Exception e) {
                         log.error(e.getMessage(), e);
                     }
@@ -76,16 +98,7 @@ public class FSUIPCServer {
         fsuipcInterface.addEventListener(new OffsetCollectionEventListener() {
             @Override
             public void valuesChanged(Collection<OffsetItem> offsetItemCollection) {
-                try {
-                    Collection<Client> clients = clientRegistry.getClients();
-                    log.debug("FSUIPCInterface.valuesChanged - {}", offsetItemCollection);
-                    for(Client client : clients) {
-                        Collection<NetMessageItem> netMessageItems = clientRegistry.filterForClient(client, offsetItemCollection);
-                        handleFSUIPCInput(client, new NetMessage(NetMessage.Command.CHANGED, netMessageItems));
-                    }
-                } catch (Exception e) {
-                    log.error(e.getMessage(), e);
-                }
+                fsuipcMessageQueue.offer(offsetItemCollection);
             }
         });
     }

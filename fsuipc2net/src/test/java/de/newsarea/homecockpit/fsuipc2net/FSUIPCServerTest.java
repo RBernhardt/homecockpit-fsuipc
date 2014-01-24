@@ -66,8 +66,10 @@ public class FSUIPCServerTest {
         Collection<NetMessageItem> netMessageItems = Arrays.asList(NetMessageItem.fromString("0x0001:2:0x01"));
         when(clientRegistry.getClients()).thenReturn(Arrays.asList(client));
         when(clientRegistry.filterForClient(eq(client), anyCollectionOf(OffsetItem.class))).thenReturn(netMessageItems);
+        // when
         offsetCollectionEventListener.fire().valuesChanged(Arrays.asList(new OffsetItem((short) 0x0001, (byte) 2, ByteArray.create(new byte[]{1}))));
-        // ~
+        Thread.sleep(10);
+        // then
         verify(netServer).write(any(Client.class), any(NetMessage.class));
     }
 
