@@ -14,6 +14,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class FSUIPCServer {
 	
@@ -23,10 +26,30 @@ public class FSUIPCServer {
 	private FSUIPCInterface fsuipcInterface;
     private ClientRegistry clientRegistry;
 
+    private LinkedBlockingQueue<Object[]> clientMessageQueue;
+
     public FSUIPCServer(final NetServer netServer, FSUIPCInterface fsuipcInterface, final ClientRegistry clientRegistry) {
         this.netServer = netServer;
         this.fsuipcInterface = fsuipcInterface;
         this.clientRegistry = clientRegistry;
+        this.clientMessageQueue = new LinkedBlockingQueue<>();
+        // ~
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                while(true) {
+                    try {
+                        Object[] data = clientMessageQueue.take();
+                        Client client = (Client) data[0];
+                        NetMessage message = (NetMessage) data[1];
+                        handleNetServerInput(client, message);
+                    } catch (Exception e) {
+                        log.error(e.getMessage(), e);
+                    }
+                }
+            }
+        });
         // ~
         netServer.addEventListener(new ServerEventListener() {
             @Override
@@ -46,11 +69,7 @@ public class FSUIPCServer {
 
             @Override
             public void valueReceived(Client client, NetMessage message) {
-                try {
-                    handleNetServerInput(client, message);
-                } catch (Exception e) {
-                    log.error(e.getMessage(), e);
-                }
+                clientMessageQueue.offer(new Object[] { client, message });
             }
         });
         // ~
