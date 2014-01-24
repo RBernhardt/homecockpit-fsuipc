@@ -19,6 +19,7 @@ public class NetMessage {
         CHANGED,
         MONITOR,
         VALUE,
+        TOGGLE,
         READ,
         WRITE
     }

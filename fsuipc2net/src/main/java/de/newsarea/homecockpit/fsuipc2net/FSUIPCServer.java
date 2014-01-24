@@ -127,6 +127,11 @@ public class FSUIPCServer {
             case WRITE:
                 fsuipcInterface.write(message.getOffsetItems());
                 break;
+            case TOGGLE:
+                for(NetMessageItem item : message.getItems()) {
+                    fsuipcInterface.toggleBit(item.getOffsetIdent().getOffset(), item.getOffsetIdent().getSize(), item.getByteArray().toByte());
+                }
+                break;
             case MONITOR:
                 for(NetMessageItem item : message.getItems()) {
                     clientRegistry.registerClientForOffsetEvent(client, item.getOffsetIdent());

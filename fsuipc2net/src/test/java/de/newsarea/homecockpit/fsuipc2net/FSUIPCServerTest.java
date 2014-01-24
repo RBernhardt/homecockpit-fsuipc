@@ -74,8 +74,10 @@ public class FSUIPCServerTest {
     @Test
     public void shouldSendWriteFromClient() throws Exception {
         NetMessage netMessage = NetMessage.fromString("WRITE[[0x0001:2:0x01]]");
+        // when
         serverEventListenerList.fire().valueReceived(new Client("Client_1"), netMessage);
-        // ~
+        Thread.sleep(10);
+        // then
         verify(fsuipcInterface).write(eq(netMessage.getOffsetItems()));
     }
 
@@ -83,8 +85,10 @@ public class FSUIPCServerTest {
     public void shouldSendMonitorFromClient() throws Exception {
         NetMessage netMessage = NetMessage.fromString("MONITOR[[0x0001:2:0x01]]");
         Client client = new Client("Client_Id");
+        // when
         serverEventListenerList.fire().valueReceived(client, netMessage);
-        // ~
+        Thread.sleep(10);
+        // then
         verify(clientRegistry).registerClientForOffsetEvent(eq(client), eq(netMessage.getItems().iterator().next().getOffsetIdent()));
         verify(fsuipcInterface).monitor(eq(netMessage.getItems().iterator().next().getOffsetIdent()));
     }
@@ -94,11 +98,23 @@ public class FSUIPCServerTest {
         NetMessage netMessage = NetMessage.fromString("READ[[0x0001:2]]");
         OffsetItem offsetItem = new OffsetItem(1,2, new byte[] { 12, 10 });
         when(fsuipcInterface.read(eq(netMessage.getItems().iterator().next().getOffsetIdent()))).thenReturn(offsetItem);
-        // ~
+        // when
         Client client = new Client("Client_Id");
         serverEventListenerList.fire().valueReceived(client, netMessage);
-        // ~
+        Thread.sleep(10);
+        // then
         verify(netServer).write(eq(client), eq(NetMessage.fromString("VALUE[[0x0001:2:0x0C0A]]")));
+    }
+
+    @Test
+    public void shouldHandleToggleMessage() throws Exception {
+        // given
+        NetMessage netMessage = NetMessage.fromString("TOGGLE[[0x0001:1:0x01]]");
+        Client client = new Client("Client_ID");
+        // when
+        serverEventListenerList.fire().valueReceived(client, netMessage);
+        // then
+        verify(fsuipcInterface).toggleBit(eq(0x0001), eq(1), eq((byte) 1));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
