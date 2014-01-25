@@ -20,8 +20,7 @@ public class NetMessage {
         MONITOR,
         VALUE,
         READ,
-        WRITE,
-        WRITEANDWAIT
+        WRITE
     }
 
     private final Command type;

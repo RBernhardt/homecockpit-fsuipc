@@ -17,7 +17,6 @@ import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeoutException;
 
 public class FSUIPCServer {
 	
@@ -140,15 +139,6 @@ public class FSUIPCServer {
         switch(message.getCommand()) {
             case WRITE:
                 fsuipcInterface.write(message.getOffsetItems());
-                break;
-            case WRITEANDWAIT:
-                for(OffsetItem item : message.getOffsetItems()) {
-                    try {
-                        fsuipcInterface.writeAndWaitForResetToZero(item);
-                    } catch (TimeoutException e) {
-                        log.error(e.getMessage(), e);
-                    }
-                }
                 break;
             case MONITOR:
                 for(NetMessageItem item : message.getItems()) {

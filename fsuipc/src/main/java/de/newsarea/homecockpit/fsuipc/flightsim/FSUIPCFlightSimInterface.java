@@ -16,7 +16,6 @@ import java.util.EventListener;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeoutException;
 
 public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 
@@ -69,23 +68,6 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 		log.debug("write offset item - {}" + offsetItem);
         fsuipcFlightSimWrapper.write(offsetItem.getOffset(), offsetItem.getSize(), offsetItem.getValue().toLittleEndian());
 	}
-
-    public void writeAndWaitForResetToZero(OffsetItem offsetItem) throws TimeoutException {
-        log.debug("write offset item and wait - {}" + offsetItem);
-        fsuipcFlightSimWrapper.write(offsetItem.getOffset(), offsetItem.getSize(), offsetItem.getValue().toLittleEndian());
-        for(int i=0; i < 100; i++) {
-            byte[] item = fsuipcFlightSimWrapper.read(offsetItem.getOffset(), offsetItem.getSize());
-            if(isZeroByteArray(item)) {
-                return;
-            }
-            try {
-                Thread.sleep(0, 1);
-            } catch (InterruptedException e) {
-                log.error(e.getMessage(), e);
-            }
-        }
-        throw new TimeoutException("reset was not perfomed");
-    }
 
     public OffsetItem read(OffsetIdent offsetIdent) {
 		byte[] data = fsuipcFlightSimWrapper.read(offsetIdent.getOffset(), offsetIdent.getSize());
@@ -189,13 +171,6 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 	}
 
 	/* HELPER */
-
-    private boolean isZeroByteArray(byte[] data) {
-        for(int i=0; i < data.length; i++) {
-            if(data[i] != 0) { return false; }
-        }
-        return true;
-    }
 	
 	private byte[] createByteArray(OffsetItem[] offsetItems) {	 
 		int currentOffset = offsetItems[0].getOffset();		

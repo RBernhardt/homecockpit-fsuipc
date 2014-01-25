@@ -108,16 +108,6 @@ public class FSUIPCServerTest {
         verify(netServer).write(eq(client), eq(NetMessage.fromString("VALUE[[0x0001:2:0x0C0A]]")));
     }
 
-    @Test
-    public void shouldHandleWriteAndWaitMessage() throws Exception {
-        NetMessage netMessage = NetMessage.fromString("WRITEANDWAIT[[0x0001:4:0x0A]]");
-        // when
-        serverEventListenerList.fire().valueReceived(new Client("Client_ID"), netMessage);
-        Thread.sleep(10);
-        // then
-        verify(fsuipcInterface).writeAndWaitForResetToZero(eq(new OffsetItem(0x0001, 4, ByteArray.create("10", 1))));
-    }
-
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void shouldSendInvalidCommandFromClient() throws Exception {
         serverEventListenerList.fire().valueReceived(new Client("Client_1"), NetMessage.fromString("INVALID[[0x0001:2:0x01]]"));
