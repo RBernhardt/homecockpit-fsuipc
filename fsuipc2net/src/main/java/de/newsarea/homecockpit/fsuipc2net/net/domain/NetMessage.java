@@ -19,9 +19,9 @@ public class NetMessage {
         CHANGED,
         MONITOR,
         VALUE,
-        TOGGLE,
         READ,
-        WRITE
+        WRITE,
+        WRITEANDWAIT
     }
 
     private final Command type;

@@ -109,23 +109,13 @@ public class FSUIPCServerTest {
     }
 
     @Test
-    public void shouldHandleToggleMessage() throws Exception {
-        NetMessage netMessage = NetMessage.fromString("TOGGLE[[0x0001:1:0x01]]");
+    public void shouldHandleWriteAndWaitMessage() throws Exception {
+        NetMessage netMessage = NetMessage.fromString("WRITEANDWAIT[[0x0001:4:0x0A]]");
         // when
         serverEventListenerList.fire().valueReceived(new Client("Client_ID"), netMessage);
         Thread.sleep(10);
         // then
-        verify(fsuipcInterface).toggleBit(eq(0x0001), eq(1), eq((byte) 1));
-    }
-
-    @Test
-    public void shouldHandleToggleMessageForBitIdx10() throws Exception {
-        NetMessage netMessage = NetMessage.fromString("TOGGLE[[0x0001:4:0x0A]]");
-        // when
-        serverEventListenerList.fire().valueReceived(new Client("Client_ID"), netMessage);
-        Thread.sleep(10);
-        // then
-        verify(fsuipcInterface).toggleBit(eq(0x0001), eq(4), eq((byte) 10));
+        verify(fsuipcInterface).writeAndWaitForResetToZero(eq(new OffsetItem(0x0001, 4, ByteArray.create("10", 1))));
     }
 
     @Test(expectedExceptions = IllegalArgumentException.class)
