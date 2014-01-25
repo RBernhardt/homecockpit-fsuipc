@@ -16,6 +16,7 @@ import java.util.EventListener;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeoutException;
 
 public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 
@@ -66,24 +67,24 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 	
 	public void write(OffsetItem offsetItem) {
 		log.debug("write offset item - {}" + offsetItem);
-		fsuipcFlightSimWrapper.write(offsetItem.getOffset(), offsetItem.getSize(), offsetItem.getValue().toLittleEndian());
-		log.debug("offset item written - {}" + offsetItem);
+        fsuipcFlightSimWrapper.write(offsetItem.getOffset(), offsetItem.getSize(), offsetItem.getValue().toLittleEndian());
 	}
 
-    @Override
-    public void toggleBit(int offset, int size, byte byteIdx) {
-        byte[] value = fsuipcFlightSimWrapper.read(offset, size);
-        int bidx = (byteIdx / 8);
-        byte nidx = (byte)(byteIdx % 8);
-        int arrayPositionIdx = value.length - 1 - bidx;
-        // set high bit
-        byte[] highByteArray = value.clone();
-        highByteArray[arrayPositionIdx] |= (1 << nidx);
-        fsuipcFlightSimWrapper.write(offset, size, highByteArray);
-        // set low bit
-        byte[] lowByteArray = value.clone();
-        lowByteArray[arrayPositionIdx] &= ~(1 << nidx);
-        fsuipcFlightSimWrapper.write(offset, size, lowByteArray);
+    public void writeAndWaitForResetToZero(OffsetItem offsetItem) throws TimeoutException {
+        log.debug("write offset item and wait - {}" + offsetItem);
+        fsuipcFlightSimWrapper.write(offsetItem.getOffset(), offsetItem.getSize(), offsetItem.getValue().toLittleEndian());
+        for(int i=0; i < 100; i++) {
+            byte[] item = fsuipcFlightSimWrapper.read(offsetItem.getOffset(), offsetItem.getSize());
+            if(isZeroByteArray(item)) {
+                return;
+            }
+            try {
+                Thread.sleep(0, 1);
+            } catch (InterruptedException e) {
+                log.error(e.getMessage(), e);
+            }
+        }
+        throw new TimeoutException("reset was not perfomed");
     }
 
     public OffsetItem read(OffsetIdent offsetIdent) {
@@ -110,8 +111,6 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
     public void addEventListener(OffsetCollectionEventListener offsetCollectionEventListener) {
         monitorOffsetThread.addEventListener(offsetCollectionEventListener);
     }
-
-
 
 	/* */
 
@@ -190,6 +189,13 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 	}
 
 	/* HELPER */
+
+    private boolean isZeroByteArray(byte[] data) {
+        for(int i=0; i < data.length; i++) {
+            if(data[i] != 0) { return false; }
+        }
+        return true;
+    }
 	
 	private byte[] createByteArray(OffsetItem[] offsetItems) {	 
 		int currentOffset = offsetItems[0].getOffset();		

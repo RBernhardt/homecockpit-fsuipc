@@ -19,6 +19,7 @@ import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -96,7 +97,7 @@ public class FSUIPCKryonetInterface implements FSUIPCInterface {
     }
 
     @Override
-    public void toggleBit(int offset, int size, byte byteIdx) {
+    public void writeAndWaitForResetToZero(OffsetItem offsetItem) throws TimeoutException {
         throw new UnsupportedOperationException();
     }
 

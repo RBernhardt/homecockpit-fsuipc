@@ -6,6 +6,7 @@ import de.newsarea.homecockpit.fsuipc.event.OffsetCollectionEventListener;
 import de.newsarea.homecockpit.fsuipc.event.OffsetEventListener;
 
 import java.net.ConnectException;
+import java.util.concurrent.TimeoutException;
 
 public interface FSUIPCInterface {
 	
@@ -15,8 +16,7 @@ public interface FSUIPCInterface {
 
 	void write(OffsetItem[] offsetItems);
 	void write(OffsetItem offsetItem);
-
-    void toggleBit(int offset, int size, byte byteIdx);
+    void writeAndWaitForResetToZero(OffsetItem offsetItem) throws TimeoutException;
 
 	OffsetItem read(OffsetIdent offsetIdent);
 

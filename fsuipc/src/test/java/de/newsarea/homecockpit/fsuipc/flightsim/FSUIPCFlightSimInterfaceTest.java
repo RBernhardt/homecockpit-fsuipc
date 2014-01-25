@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
@@ -57,13 +58,13 @@ public class FSUIPCFlightSimInterfaceTest {
 
     @Test
     public void shouldRead() {
-        when(flightSimWrapper.read(1010, 1)).thenReturn(new byte[] { 1 });
+        when(flightSimWrapper.read(1010, 1)).thenReturn(new byte[]{1});
         assertEquals(new OffsetItem(1010, 1, ByteArray.create("1", 1)), fsuipcFlightSimInterface.read(new OffsetIdent(1010, 1)));
     }
 
     @Test
     public void shouldWriteSingleItem() {
-        fsuipcFlightSimInterface.write(new OffsetItem(1000, 8, new byte[] { 5, 6, 7 }));
+        fsuipcFlightSimInterface.write(new OffsetItem(1000, 8, new byte[]{5, 6, 7}));
         assertEquals(lastWriteOffsetItems.size(), 1);
         assertEquals(1000, lastWriteOffsetItems.get(0).getOffset());
         assertEquals(8, lastWriteOffsetItems.get(0).getSize());
@@ -136,6 +137,28 @@ public class FSUIPCFlightSimInterfaceTest {
         assertEquals(1, offsetItemList.size());
     }
 
+    @Test
+    public void shouldWriteAndWaitForResetToZero() throws Exception {
+        when(flightSimWrapper.read(eq(0x0001), eq(2))).thenReturn(new byte[]{0x0001}, new byte[]{0x0000});
+        // when
+        ByteArray value = ByteArray.create("501", 2);
+        fsuipcFlightSimInterface.writeAndWaitForResetToZero(new OffsetItem(0x0001, 2, value));
+        // then
+        verify(flightSimWrapper, times(2)).read(eq(0x0001), eq(2));
+        verify(flightSimWrapper).write(0x0001, 2, value.toLittleEndian());
+    }
+
+    @Test(expectedExceptions = TimeoutException.class)
+    public void shouldNotWriteAndWaitForResetToZero_TimeoutExeption() throws Exception {
+        when(flightSimWrapper.read(eq(0x0001), eq(2))).thenReturn(new byte[] { 0x0001 });
+        // when
+        ByteArray value = ByteArray.create("501", 2);
+        fsuipcFlightSimInterface.writeAndWaitForResetToZero(new OffsetItem(0x0001, 2, value));
+        // then
+        verify(flightSimWrapper, times(100)).read(eq(0x0001), eq(2));
+        verify(flightSimWrapper).write(0x0001, 2, value.toLittleEndian());
+    }
+
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void shouldWriteMultipleItem_InvalidSort() {
         OffsetItem[] offsetItemBlock = new OffsetItem[] {
@@ -157,22 +180,6 @@ public class FSUIPCFlightSimInterfaceTest {
         };
         //
         fsuipcFlightSimInterface.write(offsetItemBlock);
-    }
-
-    @Test
-    public void shouldToggleBitZero() throws Exception {
-        when(flightSimWrapper.read(0x0001, 1)).thenReturn(new byte[] { (byte)0xF0 });
-        fsuipcFlightSimInterface.toggleBit(0x0001, 1, (byte)0);
-        verify(flightSimWrapper).write(eq(0x0001), eq(1), eq(new byte[] { (byte)0xF1 }));
-        verify(flightSimWrapper).write(eq(0x0001), eq(1), eq(new byte[] { (byte)0xF0 }));
-    }
-
-    @Test
-    public void shouldToggleBitSix() throws Exception {
-        when(flightSimWrapper.read(0x0001, 1)).thenReturn(new byte[] { 0x00 });
-        fsuipcFlightSimInterface.toggleBit(0x0001, 1, (byte)6);
-        verify(flightSimWrapper).write(eq(0x0001), eq(1), eq(new byte[] { 64 }));
-        verify(flightSimWrapper).write(eq(0x0001), eq(1), eq(new byte[] { 0 }));
     }
 
 }
