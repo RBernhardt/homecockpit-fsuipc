@@ -29,12 +29,19 @@ public class NetMessageItem {
     }
 
     public static NetMessageItem fromJsonObject(JsonObject jsonItem) {
-        OffsetIdent offsetIdent = new OffsetIdent(jsonItem.get("offset").getAsInt(), jsonItem.get("size").getAsInt());
+        String offsetString = jsonItem.get("offset").getAsString();
+        offsetString = offsetString.replaceAll("0x", "");
+        int offset = Integer.parseInt(offsetString, 16);
+        OffsetIdent offsetIdent = new OffsetIdent(offset, jsonItem.get("size").getAsInt());
         ByteArray data = null;
         if(jsonItem.has("data")) {
-            String byteArrayHex = jsonItem.get("data").getAsString();
-            byteArrayHex = byteArrayHex.replaceAll("0x", "");
-            data = ByteArray.create(new BigInteger(byteArrayHex, 16), byteArrayHex.length() / 2);
+            String dataString = jsonItem.get("data").getAsString();
+            if(dataString.contains("0x")) {
+                dataString = dataString.replaceAll("0x", "");
+                data = ByteArray.create(new BigInteger(dataString, 16), dataString.length() / 2);
+            } else {
+                data = ByteArray.create(dataString, offsetIdent.getSize());
+            }
         }
         return new NetMessageItem(offsetIdent, data);
     }
@@ -74,7 +81,7 @@ public class NetMessageItem {
 
     public JsonObject toJson() {
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("offset", offsetIdent.getOffset());
+        jsonObject.addProperty("offset", ByteArray.create(String.valueOf(getOffsetIdent().getOffset()), 2).toHexString());
         jsonObject.addProperty("size", offsetIdent.getSize());
         jsonObject.addProperty("data", byteArray.toHexString());
         return jsonObject;

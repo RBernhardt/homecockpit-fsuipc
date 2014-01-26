@@ -36,12 +36,12 @@ public class NetMessageTest {
         Collection<NetMessageItem> netMessageItems = new ArrayList<>();
         netMessageItems.add(new NetMessageItem(new OffsetIdent(0x0001, 2), ByteArray.create("502", 2)));
         NetMessage netMessage = new NetMessage(NetMessage.Command.MONITOR, netMessageItems, 0);
-        assertEquals("{\"cmd\":\"MONITOR\",\"items\":[{\"offset\":1,\"size\":2,\"data\":\"0x01F6\"}]}", netMessage.toJsonString());
+        assertEquals("{\"cmd\":\"MONITOR\",\"items\":[{\"offset\":\"0x0001\",\"size\":2,\"data\":\"0x01F6\"}]}", netMessage.toJsonString());
     }
 
     @Test
     public void shouldCreateObjectFromJson() throws Exception {
-        NetMessage netMessage = NetMessage.fromJson("{\"cmd\":\"MONITOR\",\"items\":[{\"offset\":1,\"size\":2,\"data\":\"0x01F6\"}]}");
+        NetMessage netMessage = NetMessage.fromJson("{\"cmd\":\"MONITOR\",\"items\":[{\"offset\":\"0x0001\",\"size\":2,\"data\":\"0x01F6\"}]}");
         // then
         assertEquals(NetMessage.Command.MONITOR, netMessage.getCommand());
         assertEquals(1, netMessage.getItems().size());
