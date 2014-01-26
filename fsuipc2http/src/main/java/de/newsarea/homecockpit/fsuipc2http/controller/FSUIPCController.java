@@ -70,6 +70,27 @@ public class FSUIPCController {
     }
 
     @POST
+    @Path("/offsets/{offset}")
+    @Consumes(MediaType.TEXT_PLAIN)
+    public Response postOffset(@PathParam(PARAM_OFFSET) String offsetHexString, String dataHexString) {
+        try {
+            int offset = Integer.parseInt(offsetHexString, 16);
+            // handle data key
+            if(StringUtils.isEmpty(dataHexString)) {
+                return Response.status(400).entity("data required").build();
+            }
+            ByteArray data = ByteArray.create(dataHexString);
+            // write message
+            OffsetItem offsetItem = new OffsetItem(offset, data.getSize(), data);
+            fsuipcFlightSimInterface.write(offsetItem);
+            return Response.ok().build();
+        } catch(Exception ex) {
+            log.error(ex.getMessage(), ex);
+            return buildWithAllowOriginAll(Response.serverError());
+        }
+    }
+
+    @POST
     @Path("/monitor")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response postMonitor(MultivaluedMap<String, String> formParams) {
