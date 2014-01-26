@@ -181,11 +181,11 @@ public class FSUIPCFlightSimInterfaceTest {
             executorService.execute(new Runnable() {
                 @Override
                 public void run() {
-                    fsuipcFlightSimInterface.write(new OffsetItem(0x0001, 1, ByteArray.create("1", 1)), 15);
+                    fsuipcFlightSimInterface.write(new OffsetItem(0x0001, 1, ByteArray.create("1", 1)), 20);
                 }
             });
         }
-        Thread.sleep(14);
+        Thread.sleep(10);
         // then
         verify(flightSimWrapper).write(anyInt(), anyInt(), any(byte[].class));
         // shutdown
