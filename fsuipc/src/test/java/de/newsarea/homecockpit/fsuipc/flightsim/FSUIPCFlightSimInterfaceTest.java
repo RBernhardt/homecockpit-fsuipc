@@ -6,12 +6,15 @@ import de.newsarea.homecockpit.fsuipc.domain.OffsetItem;
 import de.newsarea.homecockpit.fsuipc.event.OffsetEventListener;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -24,6 +27,8 @@ import static org.testng.AssertJUnit.assertEquals;
 import static org.testng.AssertJUnit.assertTrue;
 
 public class FSUIPCFlightSimInterfaceTest {
+
+    private static final Logger log = LoggerFactory.getLogger(FSUIPCFlightSimInterfaceTest.class);
 
     private FSUIPCFlightSimInterface fsuipcFlightSimInterface;
     private FSUIPCFlightSimWrapper flightSimWrapper;
@@ -102,7 +107,7 @@ public class FSUIPCFlightSimInterfaceTest {
                     try {
                         for(int i=0; i < 1000; i++) {
                             fsuipcFlightSimInterface.monitor(new OffsetIdent(i, 2));
-                            Thread.sleep(0, 1);
+                            Thread.sleep(1);
                         }
                     } catch (Exception ex) {
                         exceptions.add(ex);
@@ -159,4 +164,34 @@ public class FSUIPCFlightSimInterfaceTest {
         fsuipcFlightSimInterface.write(offsetItemBlock);
     }
 
+    @Test
+    public void shouldWriteWithDelay() throws Exception {
+        Date startTime = new Date();
+        fsuipcFlightSimInterface.write(new OffsetItem(0x0001, 1, ByteArray.create("1", 1)), 15);
+        // then
+        assertTrue(new Date().getTime() - startTime.getTime() > 10);
+        verify(flightSimWrapper).write(0x0001, 1, new byte[] { 1 });
+    }
+
+    @Test
+    public void shouldSyncronisedWrite() throws Exception {
+        ExecutorService executorService =  Executors.newFixedThreadPool(10);
+        // when
+        for(int i=0; i < 10; i++) {
+            executorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    fsuipcFlightSimInterface.write(new OffsetItem(0x0001, 1, ByteArray.create("1", 1)), 15);
+                }
+            });
+        }
+        Thread.sleep(14);
+        // then
+        verify(flightSimWrapper).write(anyInt(), anyInt(), any(byte[].class));
+        // shutdown
+        executorService.shutdown();
+        executorService.awaitTermination(1, TimeUnit.SECONDS);
+        //
+        verify(flightSimWrapper, times(10)).write(anyInt(), anyInt(), any(byte[].class));
+    }
 }

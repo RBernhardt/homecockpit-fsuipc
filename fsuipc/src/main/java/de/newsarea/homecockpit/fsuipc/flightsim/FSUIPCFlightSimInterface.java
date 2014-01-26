@@ -60,14 +60,24 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
         ByteArray byteArray = ByteArray.create(createByteArray(offsetItems));
         // ~
         OffsetItem offsetItem = new OffsetItem(firstOffset, byteArray.getSize(), byteArray);
-		log.debug(offsetItem.toString());
         write(offsetItem);
 	}
-	
-	public void write(OffsetItem offsetItem) {
-		log.debug("write offset item - {}" + offsetItem);
+
+    public void write(OffsetItem offsetItem) {
+        write(offsetItem, 0);
+    }
+
+	public synchronized void write(OffsetItem offsetItem, int timeOfBlocking) {
+		log.debug("write offset p {}" + offsetItem);
         fsuipcFlightSimWrapper.write(offsetItem.getOffset(), offsetItem.getSize(), offsetItem.getValue().toLittleEndian());
-	}
+        if(timeOfBlocking > 0) {
+            try {
+                Thread.sleep(timeOfBlocking);
+            } catch (InterruptedException e) {
+                log.error(e.getMessage(), e);
+            }
+        }
+    }
 
     public OffsetItem read(OffsetIdent offsetIdent) {
 		byte[] data = fsuipcFlightSimWrapper.read(offsetIdent.getOffset(), offsetIdent.getSize());
@@ -172,7 +182,7 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 
 	/* HELPER */
 	
-	private byte[] createByteArray(OffsetItem[] offsetItems) {	 
+	private byte[] createByteArray(OffsetItem[] offsetItems) {
 		int currentOffset = offsetItems[0].getOffset();		
 		OffsetItem lastOffsetItem  = offsetItems[offsetItems.length - 1];
 		int lastOffset = lastOffsetItem.getOffset() + lastOffsetItem.getSize();		

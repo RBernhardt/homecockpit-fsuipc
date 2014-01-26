@@ -96,6 +96,11 @@ public class FSUIPCKryonetInterface implements FSUIPCInterface {
     }
 
     @Override
+    public void write(OffsetItem offsetItem, int timeOfBlocking) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public OffsetItem read(OffsetIdent offsetIdent) {
         throw new UnsupportedOperationException();
     }

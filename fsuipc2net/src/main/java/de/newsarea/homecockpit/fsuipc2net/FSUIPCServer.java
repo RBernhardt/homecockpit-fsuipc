@@ -14,9 +14,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.LinkedBlockingQueue;
 
 public class FSUIPCServer {
 	
@@ -26,52 +23,10 @@ public class FSUIPCServer {
 	private FSUIPCInterface fsuipcInterface;
     private ClientRegistry clientRegistry;
 
-    private LinkedBlockingQueue<Object[]> clientMessageQueue;
-    private LinkedBlockingQueue<Collection<OffsetItem>> fsuipcMessageQueue;
-
     public FSUIPCServer(final NetServer netServer, FSUIPCInterface fsuipcInterface, final ClientRegistry clientRegistry) {
         this.netServer = netServer;
         this.fsuipcInterface = fsuipcInterface;
         this.clientRegistry = clientRegistry;
-        // ~
-        this.clientMessageQueue = new LinkedBlockingQueue<>();
-        this.fsuipcMessageQueue = new LinkedBlockingQueue<>();
-        // ~
-        ExecutorService clientMessageExecutorService = Executors.newSingleThreadExecutor();
-        clientMessageExecutorService.execute(new Runnable() {
-            @Override
-            public void run() {
-                while(true) {
-                    try {
-                        Object[] data = clientMessageQueue.take();
-                        Client client = (Client) data[0];
-                        NetMessage message = (NetMessage) data[1];
-                        handleNetServerInput(client, message);
-                    } catch (Exception e) {
-                        log.error(e.getMessage(), e);
-                    }
-                }
-            }
-        });
-        // ~
-        ExecutorService fusipcMessageExecutorService = Executors.newSingleThreadExecutor();
-        fusipcMessageExecutorService.execute(new Runnable() {
-            @Override
-            public void run() {
-                while(true) {
-                    try {
-                        Collection<OffsetItem> offsetItemCollection = fsuipcMessageQueue.take();
-                        log.debug("FSUIPCInterface.valuesChanged - {}", offsetItemCollection);
-                        for(Client client : clientRegistry.getClients()) {
-                            Collection<NetMessageItem> netMessageItems = clientRegistry.filterForClient(client, offsetItemCollection);
-                            handleFSUIPCInput(client, new NetMessage(NetMessage.Command.CHANGED, netMessageItems));
-                        }
-                    } catch (Exception e) {
-                        log.error(e.getMessage(), e);
-                    }
-                }
-            }
-        });
         // ~
         netServer.addEventListener(new ServerEventListener() {
             @Override
@@ -91,14 +46,27 @@ public class FSUIPCServer {
 
             @Override
             public void valueReceived(Client client, NetMessage message) {
-                clientMessageQueue.offer(new Object[] { client, message });
+                try {
+                    log.debug("NetServer.valueReceived - {} - {}", client, message);
+                    handleNetServerInput(client, message);
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                }
             }
         });
         // ~
         fsuipcInterface.addEventListener(new OffsetCollectionEventListener() {
             @Override
             public void valuesChanged(Collection<OffsetItem> offsetItemCollection) {
-                fsuipcMessageQueue.offer(offsetItemCollection);
+                try {
+                    log.debug("FSUIPCInterface.valuesChanged - {}", offsetItemCollection);
+                    for(Client client : clientRegistry.getClients()) {
+                        Collection<NetMessageItem> netMessageItems = clientRegistry.filterForClient(client, offsetItemCollection);
+                        handleFSUIPCInput(client, new NetMessage(NetMessage.Command.CHANGED, netMessageItems));
+                    }
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                }
             }
         });
     }
