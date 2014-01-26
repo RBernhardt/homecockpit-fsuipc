@@ -1,5 +1,6 @@
 package de.newsarea.homecockpit.fsuipc2net.net.domain;
 
+import com.google.gson.JsonObject;
 import de.newsarea.homecockpit.fsuipc.domain.ByteArray;
 import de.newsarea.homecockpit.fsuipc.domain.OffsetIdent;
 
@@ -26,6 +27,18 @@ public class NetMessageItem {
         this.offsetIdent = offsetIdent;
         this.byteArray = byteArray;
     }
+
+    public static NetMessageItem fromJsonObject(JsonObject jsonItem) {
+        OffsetIdent offsetIdent = new OffsetIdent(jsonItem.get("offset").getAsInt(), jsonItem.get("size").getAsInt());
+        ByteArray data = null;
+        if(jsonItem.has("data")) {
+            String byteArrayHex = jsonItem.get("data").getAsString();
+            byteArrayHex = byteArrayHex.replaceAll("0x", "");
+            data = ByteArray.create(new BigInteger(byteArrayHex, 16), byteArrayHex.length() / 2);
+        }
+        return new NetMessageItem(offsetIdent, data);
+    }
+
 
     public static NetMessageItem fromString(String value) {
         Pattern p = Pattern.compile(REGEX_ITEM);
@@ -57,6 +70,14 @@ public class NetMessageItem {
         int result = offsetIdent.hashCode();
         result = 31 * result + byteArray.hashCode();
         return result;
+    }
+
+    public JsonObject toJson() {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("offset", offsetIdent.getOffset());
+        jsonObject.addProperty("size", offsetIdent.getSize());
+        jsonObject.addProperty("data", byteArray.toHexString());
+        return jsonObject;
     }
 
     @Override

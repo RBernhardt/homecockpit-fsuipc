@@ -1,5 +1,8 @@
 package de.newsarea.homecockpit.fsuipc2net.net.domain;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import de.newsarea.homecockpit.fsuipc.domain.OffsetIdent;
 import de.newsarea.homecockpit.fsuipc.domain.OffsetItem;
 
@@ -51,6 +54,21 @@ public class NetMessage {
         this(type, Arrays.asList(new NetMessageItem(new OffsetIdent(offsetItem.getOffset(), offsetItem.getSize()), offsetItem.getValue())));
     }
 
+    public static NetMessage fromJson(String json) {
+        Gson gson = new Gson();
+        JsonObject jsonObject = gson.fromJson(json, JsonObject.class);
+        // get items
+        Collection<NetMessageItem> items = new ArrayList<>();
+        JsonArray jsonItems = jsonObject.getAsJsonArray("items");
+        for(int i=0; i < jsonItems.size(); i++) {
+            JsonObject jsonItem = jsonItems.get(i).getAsJsonObject();
+            items.add(NetMessageItem.fromJsonObject(jsonItem));
+        }
+        // ~
+        Command command = Command.valueOf(jsonObject.get("command").getAsString());
+        return new NetMessage(command, items);
+    }
+
     public static NetMessage fromString(String message) {
         Pattern p = Pattern.compile(REGEX_MAIN);
         Matcher m = p.matcher(message);
@@ -81,6 +99,21 @@ public class NetMessage {
         int result = type.hashCode();
         result = 31 * result + items.hashCode();
         return result;
+    }
+
+    public JsonObject toJson() {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("command", type.toString());
+        JsonArray jsonArray = new JsonArray();
+        for(NetMessageItem netMessageItem : items) {
+            jsonArray.add(netMessageItem.toJson());
+        }
+        jsonObject.add("items", jsonArray);
+        return jsonObject;
+    }
+
+    public String toJsonString() {
+        return toJson().toString();
     }
 
     public String toString() {
