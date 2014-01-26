@@ -1,7 +1,9 @@
 include ':example'
 include ':fsuipc'
 include ':fsuipc2net'
+include ':fsuipc2http'
 
 project(':example').buildFileName = 'build.gradle'
 project(':fsuipc').buildFileName = 'build.gradle'
 project(':fsuipc2net').buildFileName = 'build.gradle'
+project(':fsuipc2http').buildFileName = 'build.gradle'

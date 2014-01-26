@@ -15,6 +15,10 @@ public class OffsetIdent {
 		return this.offset;
 	}
 
+    public String getOffsetHexString() {
+        return ByteArray.create(String.valueOf(offset), 2).toHexString();
+    }
+
 	public int getSize() {
 		return this.size;
 	}

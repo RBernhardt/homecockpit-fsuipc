@@ -35,6 +35,11 @@ public final class ByteArray {
         return create(outputData);
     }
 
+    public static ByteArray create(String hexString) {
+        hexString = hexString.replaceAll("0x", "");
+        return create(new BigInteger(hexString, 16), hexString.length() / 2);
+    }
+
     public static ByteArray create(String numberString, int size) {
         BigInteger bigInt = new BigInteger(numberString);
         return create(bigInt, size);

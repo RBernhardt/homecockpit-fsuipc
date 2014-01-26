@@ -37,7 +37,7 @@ public class OffsetItem extends OffsetIdent {
         Pattern p = Pattern.compile(REGEX_ITEM);
         Matcher m = p.matcher(value);
         if(m.find()) {
-            short offset = Short.parseShort(m.group(1), 16);
+            int offset = Integer.parseInt(m.group(1), 16);
             int size = Integer.parseInt(m.group(2));
             // create byte array
             String byteArrayHex = m.group(3);
