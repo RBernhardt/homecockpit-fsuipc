@@ -62,7 +62,7 @@ public class FSUIPCServer {
                     log.debug("FSUIPCInterface.valuesChanged - {}", offsetItemCollection);
                     for(Client client : clientRegistry.getClients()) {
                         Collection<NetMessageItem> netMessageItems = clientRegistry.filterForClient(client, offsetItemCollection);
-                        handleFSUIPCInput(client, new NetMessage(NetMessage.Command.CHANGED, netMessageItems));
+                        handleFSUIPCInput(client, new NetMessage(NetMessage.Command.CHANGED, netMessageItems, 0));
                     }
                 } catch (Exception e) {
                     log.error(e.getMessage(), e);

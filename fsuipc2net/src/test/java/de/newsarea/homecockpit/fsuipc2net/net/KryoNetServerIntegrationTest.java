@@ -45,6 +45,7 @@ public class KryoNetServerIntegrationTest {
         kryoNetServer.stop();
     }
 
+    /*
     @Test
     public void shouldSendFromClient() throws Exception {
         Thread.sleep(100);
@@ -57,6 +58,21 @@ public class KryoNetServerIntegrationTest {
         //
         assertEquals(1, messages.size());
         assertEquals("[WRITE[[0x0001:2:0x5050][0xFF00:2:0x10]]]", messages.toString());
+    }
+    */
+
+    @Test
+    public void shouldSendFromClient() throws Exception {
+        Thread.sleep(100);
+        Client client = new Client();
+        client.start();
+        client.connect(5000, "localhost", PORT);
+        client.sendTCP("{\"cmd\":\"WRITE\",\"items\":[{\"offset\":1,\"size\":2,\"data\":\"0x01F6\"},{\"offset\":65280,\"size\":2,\"data\":\"0x10\"}]}");
+        client.close();
+        Thread.sleep(200);
+        //
+        assertEquals(1, messages.size());
+        assertEquals("[WRITE[[0x0001:2:0x01F6][0xFF00:2:0x10]]]", messages.toString());
     }
 
 }

@@ -15,8 +15,8 @@ public class NetMessageTest {
 
     @Test
     public void shouldReturnToString() throws Exception {
-        assertEquals("MONITOR[[0x0001:2:0xAFFA]]", new NetMessage(NetMessage.Command.MONITOR, Arrays.asList(createDummyNetMessageItem(0x0001, 2))).toString());
-        assertEquals("CHANGED[[0x1010:8:0xAFFA]]", new NetMessage(NetMessage.Command.CHANGED, Arrays.asList(createDummyNetMessageItem(0x1010, 8))).toString());
+        assertEquals("MONITOR[[0x0001:2:0xAFFA]]", new NetMessage(NetMessage.Command.MONITOR, Arrays.asList(createDummyNetMessageItem(0x0001, 2)), 0).toString());
+        assertEquals("CHANGED[[0x1010:8:0xAFFA]]", new NetMessage(NetMessage.Command.CHANGED, Arrays.asList(createDummyNetMessageItem(0x1010, 8)), 0).toString());
     }
 
     @Test
@@ -35,13 +35,13 @@ public class NetMessageTest {
     public void shouldReturnJson() throws Exception {
         Collection<NetMessageItem> netMessageItems = new ArrayList<>();
         netMessageItems.add(new NetMessageItem(new OffsetIdent(0x0001, 2), ByteArray.create("502", 2)));
-        NetMessage netMessage = new NetMessage(NetMessage.Command.MONITOR, netMessageItems);
-        assertEquals("{\"command\":\"MONITOR\",\"items\":[{\"offset\":1,\"size\":2,\"data\":\"0x01F6\"}]}", netMessage.toJsonString());
+        NetMessage netMessage = new NetMessage(NetMessage.Command.MONITOR, netMessageItems, 0);
+        assertEquals("{\"cmd\":\"MONITOR\",\"items\":[{\"offset\":1,\"size\":2,\"data\":\"0x01F6\"}]}", netMessage.toJsonString());
     }
 
     @Test
     public void shouldCreateObjectFromJson() throws Exception {
-        NetMessage netMessage = NetMessage.fromJson("{\"command\":\"MONITOR\",\"items\":[{\"offset\":1,\"size\":2,\"data\":\"0x01F6\"}]}");
+        NetMessage netMessage = NetMessage.fromJson("{\"cmd\":\"MONITOR\",\"items\":[{\"offset\":1,\"size\":2,\"data\":\"0x01F6\"}]}");
         // then
         assertEquals(NetMessage.Command.MONITOR, netMessage.getCommand());
         assertEquals(1, netMessage.getItems().size());

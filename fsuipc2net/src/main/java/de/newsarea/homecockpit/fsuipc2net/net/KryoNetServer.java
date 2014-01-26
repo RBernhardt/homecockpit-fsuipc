@@ -42,7 +42,7 @@ public class KryoNetServer implements NetServer {
                 public void received (Connection connection, Object object) {
                     if(object instanceof String) {
                         Client client = new Client(String.valueOf(connection.getID()));
-                        NetMessage message = NetMessage.fromString((String)object);
+                        NetMessage message = NetMessage.fromJson((String)object);
                         eventListeners.fire().valueReceived(client, message);
                     }
                 }
@@ -69,7 +69,7 @@ public class KryoNetServer implements NetServer {
     @Override
 	public void write(Client client, NetMessage message) throws IOException {
         int intClientId = Integer.parseInt(client.getId());
-        server.sendToTCP(intClientId, message.toString());
+        server.sendToTCP(intClientId, message.toJsonString());
 	}
 
     @Override

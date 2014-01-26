@@ -28,6 +28,7 @@ public class NetMessage {
 
     private final Command type;
     private final Collection<NetMessageItem> items;
+    private final int timeOfBlocking;
 
     public Command getCommand() {
         return type;
@@ -45,13 +46,18 @@ public class NetMessage {
         return offsetItems.toArray(new OffsetItem[items.size()]);
     }
 
-    public NetMessage(Command type, Collection<NetMessageItem> items) {
+    public NetMessage(Command type, Collection<NetMessageItem> items, int timeOfBlocking) {
         this.type = type;
         this.items = items;
+        this.timeOfBlocking = timeOfBlocking;
+    }
+
+    public NetMessage(Command type, OffsetItem offsetItem, int timeOfBlocking) {
+        this(type, Arrays.asList(new NetMessageItem(new OffsetIdent(offsetItem.getOffset(), offsetItem.getSize()), offsetItem.getValue())), timeOfBlocking);
     }
 
     public NetMessage(Command type, OffsetItem offsetItem) {
-        this(type, Arrays.asList(new NetMessageItem(new OffsetIdent(offsetItem.getOffset(), offsetItem.getSize()), offsetItem.getValue())));
+        this(type, offsetItem, 0);
     }
 
     public static NetMessage fromJson(String json) {
@@ -65,8 +71,12 @@ public class NetMessage {
             items.add(NetMessageItem.fromJsonObject(jsonItem));
         }
         // ~
-        Command command = Command.valueOf(jsonObject.get("command").getAsString());
-        return new NetMessage(command, items);
+        Command command = Command.valueOf(jsonObject.get("cmd").getAsString());
+        int timeOfBlocking = 0;
+        if(jsonObject.has("timeOfBlocking")) {
+            timeOfBlocking = jsonObject.get("timeOfBlocking").getAsInt();
+        }
+        return new NetMessage(command, items, timeOfBlocking);
     }
 
     public static NetMessage fromString(String message) {
@@ -81,7 +91,7 @@ public class NetMessage {
             while(mOffsetObj.find()) {
                 items.add(NetMessageItem.fromString(mOffsetObj.group()));
             }
-            return new NetMessage(command, items);
+            return new NetMessage(command, items, 0);
         }
         throw new IllegalArgumentException("invalid input - " + message);
     }
@@ -103,7 +113,10 @@ public class NetMessage {
 
     public JsonObject toJson() {
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("command", type.toString());
+        jsonObject.addProperty("cmd", type.toString());
+        if(timeOfBlocking > 0) {
+            jsonObject.addProperty("timeOfBlocking", timeOfBlocking);
+        }
         JsonArray jsonArray = new JsonArray();
         for(NetMessageItem netMessageItem : items) {
             jsonArray.add(netMessageItem.toJson());
