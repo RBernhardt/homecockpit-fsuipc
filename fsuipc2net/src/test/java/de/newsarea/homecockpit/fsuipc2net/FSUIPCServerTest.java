@@ -80,7 +80,7 @@ public class FSUIPCServerTest {
         serverEventListenerList.fire().valueReceived(new Client("Client_1"), netMessage);
         Thread.sleep(10);
         // then
-        verify(fsuipcInterface).write(eq(netMessage.getOffsetItems()));
+        verify(fsuipcInterface).write(eq(netMessage.getOffsetItems()[0]));
     }
 
     @Test

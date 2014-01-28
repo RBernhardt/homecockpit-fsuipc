@@ -86,11 +86,6 @@ public class FSUIPCKryonetInterface implements FSUIPCInterface {
     }
 
     @Override
-    public void write(OffsetItem[] offsetItems) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public void write(OffsetItem offsetItem) {
         throw new UnsupportedOperationException();
     }

@@ -77,23 +77,6 @@ public class FSUIPCFlightSimInterfaceTest {
     }
 
     @Test
-    public void shouldWriteMultipleValidItems() {
-        OffsetItem[] offsetItemBlock = new OffsetItem[] {
-                new OffsetItem(1000, 4, new byte[] { 4, 4, 4, 4 }),
-                new OffsetItem(1004, 1, new byte[] { 1 }),
-                new OffsetItem(1005, 5, new byte[] { 5, 5, 5, 5, 5}),
-                new OffsetItem(1010, 2, new byte[] { 2, 2 }),
-        };
-        //
-        fsuipcFlightSimInterface.write(offsetItemBlock);
-        //
-        OffsetItem wOffsetItem = lastWriteOffsetItems.get(0);
-        assertEquals(1000, wOffsetItem.getOffset());
-        assertEquals(12, wOffsetItem.getSize());
-        assertEquals(ByteArray.create(new byte[]{4, 4, 4, 4, 1, 5, 5, 5, 5, 5, 2, 2}), wOffsetItem.getValue());
-    }
-
-    @Test
     public void shouldMonitorManyOffsetIdents() throws InterruptedException, ConnectException {
         when(flightSimWrapper.read(anyInt(), anyInt())).thenReturn(new byte[]{(byte) 0xFF});
         fsuipcFlightSimInterface.open();
@@ -139,29 +122,6 @@ public class FSUIPCFlightSimInterfaceTest {
         fsuipcFlightSimInterface.close();
         // then
         assertEquals(1, offsetItemList.size());
-    }
-
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void shouldWriteMultipleItem_InvalidSort() {
-        OffsetItem[] offsetItemBlock = new OffsetItem[] {
-                new OffsetItem(0x1000, 4, new byte[] { 4, 4, 4, 4 }),
-                new OffsetItem(0x1004, 1, new byte[] { 1 }),
-                new OffsetItem(0x1010, 2, new byte[] { 2, 2 }),
-                new OffsetItem(0x1005, 5, new byte[] { 5, 5, 5, 5, 5}),
-                new OffsetItem(0x1001, 1, new byte[] { 1 }),
-        };
-        //
-        fsuipcFlightSimInterface.write(offsetItemBlock);
-    }
-
-    @Test(expectedExceptions = IllegalArgumentException.class)
-    public void shouldWriteMultipleItem_InvalidGap() {
-        OffsetItem[] offsetItemBlock = new OffsetItem[] {
-                new OffsetItem(0x1000, 4, new byte[4]),
-                new OffsetItem(0x1005, 1, new byte[1]),
-        };
-        //
-        fsuipcFlightSimInterface.write(offsetItemBlock);
     }
 
     @Test

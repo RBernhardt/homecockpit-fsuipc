@@ -13,7 +13,6 @@ public interface FSUIPCInterface {
 
 	void monitor(OffsetIdent offsetIdent);
 
-	void write(OffsetItem[] offsetItems);
 	void write(OffsetItem offsetItem);
     void write(OffsetItem offsetItem, int timeOfBlocking);
 

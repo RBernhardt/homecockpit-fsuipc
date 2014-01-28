@@ -106,7 +106,9 @@ public class FSUIPCServer {
     private void handleNetServerInput(Client client, NetMessage message) {
         switch(message.getCommand()) {
             case WRITE:
-                fsuipcInterface.write(message.getOffsetItems());
+                for(OffsetItem item : message.getOffsetItems()) {
+                    fsuipcInterface.write(item);
+                }
                 break;
             case MONITOR:
                 for(NetMessageItem item : message.getItems()) {
