@@ -1,8 +1,4 @@
-allprojects {
-
-    apply plugin: 'idea'
-
-}
+apply plugin: 'idea'
 
 subprojects {
 
@@ -44,7 +40,11 @@ subprojects {
     }
 
     signing {
-        sign configurations.archives
+        // only sign archives if keyId is set or not empty
+        if(project.hasProperty("signing.keyId")
+                && !project.getProperty("signing.keyId")?.isAllWhitespace()) {
+            sign configurations.archives
+        }
     }
 
     uploadArchives {
