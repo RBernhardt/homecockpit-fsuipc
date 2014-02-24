@@ -27,8 +27,7 @@ applicationDistribution.from(applicationDistributionConfig) {
 }
 
 installApp {
-    //destinationDir = file(distInstallPath + "/Fsuipc2Net")
-    destinationDir = file("/Volumes/share-2/fsuipc2net/")
+    destinationDir = file(distInstallPath + "/Fsuipc2Net")
 }
 
 uploadArchives.enabled = false
