@@ -7,8 +7,6 @@
 
     <context:component-scan base-package="de.newsarea.homecockpit" />
 
-    <context:property-placeholder location="classpath:config/general.properties"/>
-
     <bean id="fsuipcInterface" class="de.newsarea.homecockpit.fsuipc.flightsim.FSUIPCFlightSimInterface" factory-method="getInstance" />
 
 </beans>
