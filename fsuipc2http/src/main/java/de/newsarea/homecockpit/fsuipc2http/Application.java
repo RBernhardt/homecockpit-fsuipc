@@ -3,6 +3,8 @@ package de.newsarea.homecockpit.fsuipc2http;
 import de.newsarea.homecockpit.fsuipc.flightsim.FSUIPCFlightSimInterface;
 import de.newsarea.homecockpit.fsuipc2http.controller.FSUIPCController;
 import de.newsarea.homecockpit.fsuipc2http.netty.OutputSocketServer;
+import de.newsarea.homecockpit.fsuipc2http.watchdog.ConnectorWatchdog;
+import de.newsarea.homecockpit.fsuipc2http.watchdog.FSUIPCWatchdogHandler;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -23,6 +25,7 @@ public class Application {
     private FSUIPCFlightSimInterface fsuipcFlightSimInterface;
     private HttpServer httpServer;
     private OutputSocketServer outputSocketServer;
+    private ConnectorWatchdog connectorWatchdog;
 
     public static void main(String[] args) throws Exception {
         Application app = new Application();
@@ -40,11 +43,17 @@ public class Application {
                 }
             }
         });
+        //
+        connectorWatchdog = new ConnectorWatchdog();
         // ~
         ApplicationContext appCtx = new ClassPathXmlApplicationContext(SPRING_XML_FILES);
         fsuipcFlightSimInterface = (FSUIPCFlightSimInterface) appCtx.getBean("fsuipcInterface");
+        // ~
         try {
             fsuipcFlightSimInterface.open();
+            // ~
+            connectorWatchdog.monitorConnector("fsuipcFlightSimInterface", new FSUIPCWatchdogHandler(fsuipcFlightSimInterface));
+            connectorWatchdog.start();
             // ~
             httpServer = GrizzlyHttpServerFactory.createHttpServer(getBaseURI(), create(), false);
             httpServer.start();
@@ -69,6 +78,10 @@ public class Application {
 
     public void shutdown() {
         log.info("shutdown ...");
+        if(connectorWatchdog != null) {
+            connectorWatchdog.stop();
+            log.info("# connectorWatchdog stopped");
+        }
         if(fsuipcFlightSimInterface != null) {
             fsuipcFlightSimInterface.close();
             log.info("# fsuipcFlightSimInterface stopped");
