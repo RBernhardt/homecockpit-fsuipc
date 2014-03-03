@@ -28,8 +28,7 @@ applicationDistribution.from(applicationDistributionConfig) {
 }
 
 installApp {
-    //destinationDir = file(distInstallPath + "/Fsuipc2Http")
-    destinationDir = file("/Volumes/fsuipc2http/data")
+    destinationDir = file(distInstallPath + "/Fsuipc2Http")
 }
 
 uploadArchives.enabled = false
