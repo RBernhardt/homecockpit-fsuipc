@@ -43,12 +43,13 @@ public class OffsetMonitor {
             throw new IllegalStateException("scheduledExecutorService is running");
         }
         scheduledExecutorService = Executors.newScheduledThreadPool(1);
-        scheduledExecutorService.schedule(new Runnable() {
+        scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
                 readOffsetChanges();
             }
         },
+        1,
         1,
         TimeUnit.NANOSECONDS);
     }

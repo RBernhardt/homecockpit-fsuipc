@@ -23,7 +23,6 @@ public class FSUIPCWatchdogHandler implements MonitorableConnector {
         OffsetItem offsetItem = fsuipcFlightSimInterface.read(new OffsetIdent(0x0274, 2));
         if(offsetItem != null) {
             short value = offsetItem.getValue().toShort();
-            log.info("value={}", value);
             return value > 0;
         }
         return false;
@@ -31,6 +30,7 @@ public class FSUIPCWatchdogHandler implements MonitorableConnector {
 
     @Override
     public boolean reconnect() {
+        log.info("reconnect fsuipcFlightSimInterface");
         fsuipcFlightSimInterface.close();
         try {
             fsuipcFlightSimInterface.open();
