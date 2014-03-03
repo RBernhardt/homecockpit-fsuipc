@@ -22,18 +22,16 @@ public class OffsetMonitor {
     private static final Logger log = LoggerFactory.getLogger(OffsetMonitor.class);
 
     private final FSUIPCFlightSimInterface fsuipcFlightSimInterface;
-
     private final Map<String, OffsetIdent> monitorOffsetList;
-    private final ByteArray[] offsetValues;
     private final EventListenerSupport<OffsetEventListener> offsetEventListeners;
     private final EventListenerSupport<OffsetCollectionEventListener> offsetCollectionEventListeners;
 
+    private ByteArray[] offsetValues;
     private ScheduledExecutorService scheduledExecutorService;
 
     public OffsetMonitor(FSUIPCFlightSimInterface fsuipcFlightSimInterface) {
         this.fsuipcFlightSimInterface = fsuipcFlightSimInterface;
         this.monitorOffsetList = new ConcurrentHashMap<>();
-        this.offsetValues = new ByteArray[0x6000];
         this.offsetEventListeners = EventListenerSupport.create(OffsetEventListener.class);
         this.offsetCollectionEventListeners = EventListenerSupport.create(OffsetCollectionEventListener.class);
     }
@@ -42,6 +40,9 @@ public class OffsetMonitor {
         if(scheduledExecutorService != null) {
             throw new IllegalStateException("scheduledExecutorService is running");
         }
+        // reset offset values
+        offsetValues = new ByteArray[0x6000];
+        //
         scheduledExecutorService = Executors.newScheduledThreadPool(1);
         scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
             @Override
@@ -67,11 +68,12 @@ public class OffsetMonitor {
     }
 
     private void readOffsetChanges() {
+        if(monitorOffsetList.values() == null) { return; }
+        // only execute if monitor offset list is not empty
         try {
             List<OffsetItem> offsetItemGroup = new ArrayList<>();
             // iterate monitor offsets
             for (OffsetIdent monitorOffsetIdent : monitorOffsetList.values()) {
-                //
                 int mOffset = monitorOffsetIdent.getOffset();
                 final OffsetItem newOffsetItem = fsuipcFlightSimInterface.read(new OffsetIdent(mOffset, monitorOffsetIdent.getSize()));
                 // determine old offset value
