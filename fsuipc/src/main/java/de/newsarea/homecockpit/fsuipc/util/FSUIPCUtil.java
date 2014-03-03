@@ -81,7 +81,7 @@ public final class FSUIPCUtil {
      * *360/(65536*65536) for degrees
      * if (hdg < 0) { hdg += 360; }
      */
-	public static double toHeading(int fsuipcHeading) {
+	public static double toHeading(long fsuipcHeading) {
 		double hdg = fsuipcHeading * 8.3819E-008; //8.1716E-008D;
         if (hdg < 0) { hdg += 360; }
         return (new BigDecimal(hdg)).setScale(2, RoundingMode.HALF_UP).doubleValue();

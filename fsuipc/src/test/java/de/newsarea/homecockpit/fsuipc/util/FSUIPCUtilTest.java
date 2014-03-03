@@ -87,6 +87,7 @@ public class FSUIPCUtilTest {
         assertEquals(90D, FSUIPCUtil.toHeading(1073742230));
         assertEquals(180D, FSUIPCUtil.toHeading(-2147482835));
         assertEquals(359D, FSUIPCUtil.toHeading(-11928844));
+        assertEquals(241.9D, FSUIPCUtil.toHeading(2886002457L));
     }
 
     @Test

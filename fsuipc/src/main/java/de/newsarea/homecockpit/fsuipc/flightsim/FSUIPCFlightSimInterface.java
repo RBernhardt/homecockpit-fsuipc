@@ -151,6 +151,12 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 			}
 		}
 
+        @Override
+        public void start() {
+            this.exit = false;
+            super.start();
+        }
+
 		public void monitorOffset(OffsetIdent offsetIdent) {
             if(!monitorOffsetList.containsKey(offsetIdent.getIdentifier())) {
                 log.debug("monitor offset - " + offsetIdent.toString());
