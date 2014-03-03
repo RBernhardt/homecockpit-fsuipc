@@ -6,6 +6,8 @@ import de.newsarea.homecockpit.fsuipc.flightsim.FSUIPCFlightSimInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.ConnectException;
+
 public class FSUIPCWatchdogHandler implements MonitorableConnector {
 
     private static final Logger log = LoggerFactory.getLogger(FSUIPCWatchdogHandler.class);
@@ -29,7 +31,13 @@ public class FSUIPCWatchdogHandler implements MonitorableConnector {
 
     @Override
     public boolean reconnect() {
-        log.info("### try to reconnect");
+        fsuipcFlightSimInterface.close();
+        try {
+            fsuipcFlightSimInterface.open();
+            return true;
+        } catch (ConnectException e) {
+            log.error(e.getMessage(), e);
+        }
         return false;
     }
 }
