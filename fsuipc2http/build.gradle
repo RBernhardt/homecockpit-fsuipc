@@ -1,4 +1,14 @@
 apply plugin: 'application'
+apply plugin: 'gradle-one-jar'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.github.rholder:gradle-one-jar:1.0.4'
+    }
+}
 
 archivesBaseName = 'fsuipc2http'
 
@@ -30,6 +40,11 @@ applicationDistribution.from(applicationDistributionConfig) {
 
 installApp {
     destinationDir = file(distInstallPath + "/Fsuipc2Http")
+}
+
+task generateOneJar(type: OneJar) {
+    mainClass = mainClassName
+    archiveName = 'fsuipc2http.jar'
 }
 
 uploadArchives.enabled = false
