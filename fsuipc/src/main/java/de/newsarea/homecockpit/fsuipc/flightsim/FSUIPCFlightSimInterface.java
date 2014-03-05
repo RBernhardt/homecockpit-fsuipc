@@ -36,12 +36,8 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
     }
 
 	public void open() throws ConnectException {
-        try {
-		    fsuipcFlightSimWrapper.open();
-		    offsetMonitor.open();
-        } catch(Exception ex) {
-            throw new ConnectException(ex.getMessage());
-        }
+        fsuipcFlightSimWrapper.open();
+        offsetMonitor.open();
 	}
 
     @Override

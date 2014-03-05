@@ -8,6 +8,7 @@ import de.newsarea.homecockpit.fsuipc2http.netty.OutputSocketServer;
 import de.newsarea.homecockpit.fsuipc2http.watchdog.ConnectorWatchdog;
 import de.newsarea.homecockpit.fsuipc2http.watchdog.FSUIPCWatchdogHandler;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.lang3.SystemUtils;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -31,6 +32,11 @@ public class Application {
     private ConnectorWatchdog connectorWatchdog;
 
     public static void main(String[] args) throws Exception {
+        if(!SystemUtils.IS_OS_WINDOWS) {
+            System.out.println("[ERROR] fsuipc2http will only run on a Microsoft Windows operating system.");
+            return;
+        }
+        // ~
         CMDParser cmdParser = new CMDParser(8080, 8081);
         CMDOptions cmdOptions = null;
         try {
@@ -77,6 +83,8 @@ public class Application {
             // ~
             System.in.read();
             log.info("server running at " + baseURI);
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
         } finally {
             shutdown();
         }
