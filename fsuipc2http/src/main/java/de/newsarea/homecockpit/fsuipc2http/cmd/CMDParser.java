@@ -30,6 +30,8 @@ public class CMDParser {
         try {
             cmdLine = parser.parse(options, args);
         } catch (ParseException ex) {
+            System.out.println("[ERROR] " + ex.getMessage());
+            System.out.println("");
             HelpFormatter formatter = new HelpFormatter();
             formatter.printHelp("fsuipc2http [OPTIONS]", options );
             return null;
