@@ -4,6 +4,7 @@ import org.apache.commons.cli.*;
 
 public class CMDParser {
 
+    private static final String CMD_OPTS_HELP = "help";
     private static final String CMD_OPTS_HTTPPORT = "http-port";
     private static final String CMD_OPTS_SOCKETPORT = "socket-port";
 
@@ -16,12 +17,22 @@ public class CMDParser {
     }
 
     public CMDOptions parse(String[] args) throws ParseException {
-        Option httpPortOption = new Option("h", CMD_OPTS_HTTPPORT, true, "HTTP-Port for FSUIPC Connections");
-        Option socketPortOption = new Option("s", CMD_OPTS_SOCKETPORT , true, "Socket-Port for FSUIPC Events");
-        Options options = new Options().addOption(httpPortOption).addOption(socketPortOption);
+        Option helpOption = new Option("h", CMD_OPTS_HELP , false, "help message");
+        Option httpPortOption = new Option("p", CMD_OPTS_HTTPPORT, true, "http-port for FSUIPC connections");
+        Option socketPortOption = new Option("s", CMD_OPTS_SOCKETPORT , true, "socket-port for FSUIPC events");
+        Options options = new Options()
+            .addOption(helpOption)
+            .addOption(httpPortOption)
+            .addOption(socketPortOption);
         //
         CommandLineParser parser = new PosixParser();
         CommandLine cmdLine = parser.parse(options, args);
+        // print help
+        if(cmdLine.hasOption(CMD_OPTS_HELP)) {
+            HelpFormatter formatter = new HelpFormatter();
+            formatter.printHelp("fsuipc2http [OPTIONS]", options );
+            return null;
+        }
         // validation of inputs
         Integer httpPort = tryToParse(cmdLine, CMD_OPTS_HTTPPORT, defaultHttpPort);
         int socketPort = tryToParse(cmdLine, CMD_OPTS_SOCKETPORT, defaultSocketPort);;

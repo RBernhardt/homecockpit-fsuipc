@@ -32,7 +32,8 @@ public class Application {
     public static void main(String[] args) throws Exception {
         CMDParser cmdParser = new CMDParser(8080, 8081);
         CMDOptions cmdOptions = cmdParser.parse(args);
-        //
+        if(cmdOptions == null) { return; }
+        // ~
         Application app = new Application();
         app.start(cmdOptions);
     }
