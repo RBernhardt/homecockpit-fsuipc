@@ -7,6 +7,7 @@ import de.newsarea.homecockpit.fsuipc2http.controller.FSUIPCController;
 import de.newsarea.homecockpit.fsuipc2http.netty.OutputSocketServer;
 import de.newsarea.homecockpit.fsuipc2http.watchdog.ConnectorWatchdog;
 import de.newsarea.homecockpit.fsuipc2http.watchdog.FSUIPCWatchdogHandler;
+import de.newsarea.homecockpit.fsuipc2http.watchdog.event.ConnectorStateChangedEventListener;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.lang3.SystemUtils;
 import org.glassfish.grizzly.http.server.HttpServer;
@@ -30,6 +31,7 @@ public class Application {
     private HttpServer httpServer;
     private OutputSocketServer outputSocketServer;
     private ConnectorWatchdog connectorWatchdog;
+    private ApplicationWindow applicationWindow;
 
     public static void main(String[] args) throws Exception {
         if(!SystemUtils.IS_OS_WINDOWS) {
@@ -62,8 +64,16 @@ public class Application {
                 }
             }
         });
+        // ~
+        applicationWindow = new ApplicationWindow();
         //
         connectorWatchdog = new ConnectorWatchdog();
+        connectorWatchdog.addEventListerner(new ConnectorStateChangedEventListener() {
+            @Override
+            public void stateChanged(State state) {
+                applicationWindow.setConnectionStatus(state.toString());
+            }
+        });
         // ~
         ApplicationContext appCtx = new ClassPathXmlApplicationContext(SPRING_XML_FILES);
         fsuipcFlightSimInterface = (FSUIPCFlightSimInterface) appCtx.getBean("fsuipcInterface");
@@ -77,15 +87,14 @@ public class Application {
             URI baseURI = getBaseURI(cmdOptions.getHttpPort());
             httpServer = GrizzlyHttpServerFactory.createHttpServer(baseURI, create(), false);
             httpServer.start();
+            log.info("server running at " + baseURI);
             // ~
             outputSocketServer = new OutputSocketServer(fsuipcFlightSimInterface, cmdOptions.getSocketPort());
             outputSocketServer.open();
             // ~
-            System.in.read();
-            log.info("server running at " + baseURI);
+            applicationWindow.showWindow();
         } catch (Exception ex) {
             log.error(ex.getMessage(), ex);
-        } finally {
             shutdown();
         }
     }

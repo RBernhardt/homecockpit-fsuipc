@@ -52,7 +52,7 @@ public class ConnectorWatchdogTest {
         connectorWatchdog.start();
         Thread.sleep(1);
         // then
-        verify(connectorStateChangedEventListener).stateChanged(eq(ConnectorStateChangedEventListener.State.CLOSE));
+        verify(connectorStateChangedEventListener).stateChanged(eq(ConnectorStateChangedEventListener.State.CLOSED));
         // close
         connectorWatchdog.stop();
     }

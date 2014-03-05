@@ -46,7 +46,7 @@ public class ConnectorWatchdog {
                 lastState = lastStates.get(id);
             }
             // ~
-            ConnectorStateChangedEventListener.State currentState = ConnectorStateChangedEventListener.State.CLOSE;
+            ConnectorStateChangedEventListener.State currentState = ConnectorStateChangedEventListener.State.CLOSED;
             if(monitorableConnector.isAlive()) {
                 currentState = ConnectorStateChangedEventListener.State.OPEN;
             }
@@ -57,7 +57,7 @@ public class ConnectorWatchdog {
                 eventListenerEventListenerSupport.fire().stateChanged(currentState);
             }
             // try to reconnect
-            if(currentState == ConnectorStateChangedEventListener.State.CLOSE) {
+            if(currentState == ConnectorStateChangedEventListener.State.CLOSED) {
                 monitorableConnector.reconnect();
             }
         } catch(Exception ex) {
