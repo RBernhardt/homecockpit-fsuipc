@@ -1,6 +1,8 @@
 package de.newsarea.homecockpit.fsuipc2http;
 
 import de.newsarea.homecockpit.fsuipc.flightsim.FSUIPCFlightSimInterface;
+import de.newsarea.homecockpit.fsuipc2http.cmd.CMDOptions;
+import de.newsarea.homecockpit.fsuipc2http.cmd.CMDParser;
 import de.newsarea.homecockpit.fsuipc2http.controller.FSUIPCController;
 import de.newsarea.homecockpit.fsuipc2http.netty.OutputSocketServer;
 import de.newsarea.homecockpit.fsuipc2http.watchdog.ConnectorWatchdog;
@@ -28,11 +30,14 @@ public class Application {
     private ConnectorWatchdog connectorWatchdog;
 
     public static void main(String[] args) throws Exception {
+        CMDParser cmdParser = new CMDParser(8080, 8081);
+        CMDOptions cmdOptions = cmdParser.parse(args);
+        //
         Application app = new Application();
-        app.start();
+        app.start(cmdOptions);
     }
 
-    public void start() throws Exception {
+    public void start(CMDOptions cmdOptions) throws Exception {
         Runtime.getRuntime().addShutdownHook(new Thread() {
             @Override
             public void run() {
@@ -55,21 +60,22 @@ public class Application {
             connectorWatchdog.monitorConnector("fsuipcFlightSimInterface", new FSUIPCWatchdogHandler(fsuipcFlightSimInterface));
             connectorWatchdog.start();
             // ~
-            httpServer = GrizzlyHttpServerFactory.createHttpServer(getBaseURI(), create(), false);
+            URI baseURI = getBaseURI(cmdOptions.getHttpPort());
+            httpServer = GrizzlyHttpServerFactory.createHttpServer(baseURI, create(), false);
             httpServer.start();
             // ~
-            outputSocketServer = new OutputSocketServer(fsuipcFlightSimInterface, 8081);
+            outputSocketServer = new OutputSocketServer(fsuipcFlightSimInterface, cmdOptions.getSocketPort());
             outputSocketServer.open();
             // ~
             System.in.read();
-            log.info("server running at " + getBaseURI());
+            log.info("server running at " + baseURI);
         } finally {
             shutdown();
         }
     }
 
-    private static URI getBaseURI() {
-        return UriBuilder.fromUri("http://0.0.0.0/").port(8080).build();
+    private static URI getBaseURI(Integer httpPort) {
+        return UriBuilder.fromUri("http://0.0.0.0/").port(httpPort).build();
     }
 
     public ResourceConfig create() {
