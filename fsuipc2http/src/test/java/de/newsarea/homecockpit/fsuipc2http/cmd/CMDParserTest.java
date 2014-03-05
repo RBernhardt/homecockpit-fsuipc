@@ -1,5 +1,6 @@
 package de.newsarea.homecockpit.fsuipc2http.cmd;
 
+import org.apache.commons.cli.ParseException;
 import org.testng.annotations.Test;
 
 import static org.testng.AssertJUnit.assertEquals;
@@ -16,7 +17,7 @@ public class CMDParserTest {
 
     @Test
     public void shouldReturnHTTPPortByShortOption() throws Exception {
-        CMDOptions options = new CMDParser(8080, 8081).parse(new String[] { "-h", "1000"});
+        CMDOptions options = new CMDParser(8080, 8081).parse(new String[] { "-p", "1000"});
         assertEquals(1000, options.getHttpPort());
         assertEquals(8081, options.getSocketPort());
     }
@@ -40,6 +41,11 @@ public class CMDParserTest {
         CMDOptions options = new CMDParser(8080, 8081).parse(new String[] { "--socket-port=1000"});
         assertEquals(1000, options.getSocketPort());
         assertEquals(8080, options.getHttpPort());
+    }
+
+    @Test(expectedExceptions = ParseException.class)
+    public void shouldThrowParseException() throws Exception {
+        new CMDParser(8080, 8081).parse(new String[] { "--invalid"});
     }
 
 }

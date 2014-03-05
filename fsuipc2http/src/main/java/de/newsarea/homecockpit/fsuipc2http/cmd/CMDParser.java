@@ -26,16 +26,7 @@ public class CMDParser {
             .addOption(socketPortOption);
         //
         CommandLineParser parser = new PosixParser();
-        CommandLine cmdLine;
-        try {
-            cmdLine = parser.parse(options, args);
-        } catch (ParseException ex) {
-            System.out.println("[ERROR] " + ex.getMessage());
-            System.out.println("");
-            HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("fsuipc2http [OPTIONS]", options );
-            return null;
-        }
+        CommandLine cmdLine = parser.parse(options, args);
         // print help
         if(cmdLine.hasOption(CMD_OPTS_HELP)) {
             HelpFormatter formatter = new HelpFormatter();

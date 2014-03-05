@@ -7,6 +7,7 @@ import de.newsarea.homecockpit.fsuipc2http.controller.FSUIPCController;
 import de.newsarea.homecockpit.fsuipc2http.netty.OutputSocketServer;
 import de.newsarea.homecockpit.fsuipc2http.watchdog.ConnectorWatchdog;
 import de.newsarea.homecockpit.fsuipc2http.watchdog.FSUIPCWatchdogHandler;
+import org.apache.commons.cli.ParseException;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -31,7 +32,13 @@ public class Application {
 
     public static void main(String[] args) throws Exception {
         CMDParser cmdParser = new CMDParser(8080, 8081);
-        CMDOptions cmdOptions = cmdParser.parse(args);
+        CMDOptions cmdOptions = null;
+        try {
+            cmdOptions = cmdParser.parse(args);
+        } catch (ParseException ex) {
+            System.out.println("[ERROR] " + ex.getMessage());
+            System.out.println("please use 'fsuipc2http -h' for help");
+        }
         if(cmdOptions == null) { return; }
         // ~
         Application app = new Application();
