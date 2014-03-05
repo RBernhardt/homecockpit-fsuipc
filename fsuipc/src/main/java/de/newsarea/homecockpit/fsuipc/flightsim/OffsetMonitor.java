@@ -52,7 +52,7 @@ public class OffsetMonitor {
         },
         1,
         1,
-        TimeUnit.NANOSECONDS);
+        TimeUnit.MICROSECONDS);
     }
 
     public void close() {
@@ -68,7 +68,7 @@ public class OffsetMonitor {
     }
 
     private void readOffsetChanges() {
-        if(monitorOffsetList.values() == null) { return; }
+        if(monitorOffsetList.values().size() == 0) { return; }
         // only execute if monitor offset list is not empty
         try {
             List<OffsetItem> offsetItemGroup = new ArrayList<>();

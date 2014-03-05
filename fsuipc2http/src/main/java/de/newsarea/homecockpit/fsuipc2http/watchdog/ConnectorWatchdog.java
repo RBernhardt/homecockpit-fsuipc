@@ -32,7 +32,7 @@ public class ConnectorWatchdog {
         for(ScheduledExecutorService scheduledExecutorService : watchdogExecutorServiceList.values()) {
             scheduledExecutorService.shutdown();
             try {
-                scheduledExecutorService.awaitTermination(1, TimeUnit.SECONDS);
+                scheduledExecutorService.awaitTermination(10, TimeUnit.SECONDS);
             } catch (Exception ex) {
                 log.error(ex.getMessage(), ex);
             }

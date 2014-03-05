@@ -1,11 +1,17 @@
 package de.newsarea.homecockpit.fsuipc2http;
 
 import de.newsarea.homecockpit.fsuipc2http.watchdog.event.ConnectorStateChangedEventListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
+import java.net.URL;
 
 public class ApplicationWindow extends JFrame {
+
+    private static final Logger log = LoggerFactory.getLogger(ApplicationWindow.class);
 
     private JLabel lStatus;
 
@@ -28,13 +34,55 @@ public class ApplicationWindow extends JFrame {
         lStatus.setText(status);
     }
 
-    public void showWindow() {
+    public void showWindow() throws AWTException {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(false);
         this.setMinimumSize(new Dimension(200, 50));
         this.setLocationRelativeTo(null);
         this.pack();
-        this.setVisible(true);
+        this.setVisible(false);
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowIconified(WindowEvent e) {
+                setVisible(false);
+            }
+        });
+        showTrayIcon();
+    }
+
+    public void showTrayIcon() throws AWTException {
+        URL imageURL = ApplicationWindow.class.getResource("/icon/tray.png");
+        Image image = Toolkit.getDefaultToolkit().getImage(imageURL);
+        final TrayIcon trayIcon = new TrayIcon(image);
+        // ~
+        final PopupMenu popup = new PopupMenu();
+        MenuItem showOrHideItem = new MenuItem("Show / Hide");
+        showOrHideItem.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                toggleVisibility();
+            }
+        });
+        popup.add(showOrHideItem);
+        MenuItem exitItem = new MenuItem("Exit");
+        exitItem.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setVisible(false);
+                dispose();
+                System.exit(0);
+            }
+        });
+        popup.add(exitItem);
+        trayIcon.setPopupMenu(popup);
+        // ~
+        final SystemTray tray = SystemTray.getSystemTray();
+        tray.add(trayIcon);
+    }
+
+    private void toggleVisibility() {
+        setState(isVisible() ? Frame.ICONIFIED : Frame.NORMAL);
+        setVisible(!isVisible());
     }
 
 }
