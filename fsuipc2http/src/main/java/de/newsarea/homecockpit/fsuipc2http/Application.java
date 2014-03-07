@@ -34,23 +34,27 @@ public class Application {
     private ApplicationWindow applicationWindow;
 
     public static void main(String[] args) throws Exception {
-        if(!SystemUtils.IS_OS_WINDOWS) {
-            System.out.println("[ERROR] fsuipc2http will only run on a Microsoft Windows operating system.");
-            return;
-        }
-        // ~
-        CMDParser cmdParser = new CMDParser(8080, 8081);
-        CMDOptions cmdOptions = null;
         try {
-            cmdOptions = cmdParser.parse(args);
-        } catch (ParseException ex) {
-            System.out.println("[ERROR] " + ex.getMessage());
-            System.out.println("please use 'fsuipc2http -h' for help");
+            if(!SystemUtils.IS_OS_WINDOWS) {
+                System.out.println("[ERROR] fsuipc2http will only run on a Microsoft Windows operating system.");
+                return;
+            }
+            // ~
+            CMDParser cmdParser = new CMDParser(8080, 8081);
+            CMDOptions cmdOptions = null;
+            try {
+                cmdOptions = cmdParser.parse(args);
+            } catch (ParseException ex) {
+                System.out.println("[ERROR] " + ex.getMessage());
+                System.out.println("please use 'fsuipc2http -h' for help");
+            }
+            if(cmdOptions == null) { return; }
+            // ~
+            Application app = new Application();
+            app.start(cmdOptions);
+        } catch(Exception ex) {
+            log.error(ex.getMessage(), ex);
         }
-        if(cmdOptions == null) { return; }
-        // ~
-        Application app = new Application();
-        app.start(cmdOptions);
     }
 
     public void start(CMDOptions cmdOptions) throws Exception {
