@@ -40,11 +40,6 @@ public class JPanelSyncAppender extends AppenderSkeleton {
         return true;
     }
 
-    /**
-     * Performs checks to make sure the appender ui is still alive.
-     *
-     * @return
-     */
     private boolean performChecks() {
         return !closed && layout != null;
     }
