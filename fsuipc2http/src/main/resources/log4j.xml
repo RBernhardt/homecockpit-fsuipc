@@ -20,11 +20,19 @@
         </layout>
     </appender>
 
+    <appender name="logPanel" class="de.newsarea.homecockpit.fsuipc2http.log4j.JPanelSyncAppender">
+        <param name="Threshold" value="INFO" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d [%t] %-5p %c - %m%n" />
+        </layout>
+    </appender>
+
 	<!-- Root Logger -->
 	<root>
 		<priority value="INFO" />
 		<appender-ref ref="console" />
         <appender-ref ref="sns" />
+        <appender-ref ref="logPanel" />
 	</root>
 
 </log4j:configuration>

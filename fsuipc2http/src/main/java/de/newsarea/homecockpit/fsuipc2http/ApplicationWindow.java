@@ -1,19 +1,25 @@
 package de.newsarea.homecockpit.fsuipc2http;
 
+import de.newsarea.homecockpit.fsuipc2http.log4j.JLogPanel;
+import de.newsarea.homecockpit.fsuipc2http.log4j.JPanelSyncAppender;
 import de.newsarea.homecockpit.fsuipc2http.watchdog.event.ConnectorStateChangedEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.*;
+import java.net.Inet4Address;
 import java.net.URL;
+import java.net.UnknownHostException;
 
 public class ApplicationWindow extends JFrame {
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationWindow.class);
 
     private JLabel lStatus;
+    private JLogPanel logPanel;
 
     public ApplicationWindow() {
         super("FSUIPC 2 HTTP");
@@ -21,12 +27,55 @@ public class ApplicationWindow extends JFrame {
     }
 
     private void fillContent() {
+        this.getContentPane().add(createMainPanel());
+    }
+
+
+
+    private JPanel createMainPanel() {
         JPanel panel = new JPanel();
-        panel.setLayout(new FlowLayout());
-        panel.add(new JLabel("Connection: "));
+        panel.setPreferredSize(new Dimension(800, 600));
+        panel.setLayout(new BorderLayout());
+        panel.add(createInfoPanel(), BorderLayout.NORTH);
+        panel.add(createStatusPanel());
+        panel.add(createLogPanel(), BorderLayout.CENTER);
+        return panel;
+    }
+
+    private JPanel createInfoPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(new EmptyBorder(5, 10, 5, 0));
+        panel.add(createNetworkPanel());
+        panel.add(createStatusPanel());
+        return panel;
+    }
+
+    private JPanel createNetworkPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new FlowLayout(FlowLayout.LEFT, 2, 1));
+        JLabel lTitle = new JLabel("Server / IP: ");
+        lTitle.setPreferredSize(new Dimension(90, 25));
+        panel.add(lTitle);
+        JLabel lValue = new JLabel();
+        lValue.setText(determineHostAddress());
+        panel.add(lValue);
+        return panel;
+    }
+
+    private JPanel createStatusPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new FlowLayout(FlowLayout.LEFT, 2, 1));
+        JLabel lTitle = new JLabel("Connection: ");
+        lTitle.setPreferredSize(new Dimension(90, 25));
+        panel.add(lTitle);
         lStatus = new JLabel(ConnectorStateChangedEventListener.State.CLOSED.toString());
         panel.add(lStatus);
-        this.getContentPane().add(panel);
+        return panel;
+    }
+
+    private JScrollPane createLogPanel() {
+        return JPanelSyncAppender.getJLogPanel();
     }
 
     public void setConnectionStatus(String status) {
@@ -36,11 +85,9 @@ public class ApplicationWindow extends JFrame {
 
     public void showWindow() throws AWTException {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setResizable(false);
-        this.setMinimumSize(new Dimension(200, 50));
         this.setLocationRelativeTo(null);
         this.pack();
-        this.setVisible(false);
+        this.setVisible(true);
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowIconified(WindowEvent e) {
@@ -87,6 +134,15 @@ public class ApplicationWindow extends JFrame {
         // ~
         final SystemTray tray = SystemTray.getSystemTray();
         tray.add(trayIcon);
+    }
+
+    private String determineHostAddress() {
+        try {
+            return Inet4Address.getLocalHost().toString();
+        } catch (UnknownHostException e) {
+            log.error(e.getMessage(), e);
+        }
+        return "NOT AVAIABLE";
     }
 
     private void toggleVisibility() {
