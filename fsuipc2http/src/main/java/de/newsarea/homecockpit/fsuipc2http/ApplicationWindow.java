@@ -76,6 +76,15 @@ public class ApplicationWindow extends JFrame {
         popup.add(exitItem);
         trayIcon.setPopupMenu(popup);
         // ~
+        trayIcon.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if(e.getClickCount() == 2) {
+                    toggleVisibility();
+                }
+            }
+        });
+        // ~
         final SystemTray tray = SystemTray.getSystemTray();
         tray.add(trayIcon);
     }
@@ -83,6 +92,7 @@ public class ApplicationWindow extends JFrame {
     private void toggleVisibility() {
         setState(isVisible() ? Frame.ICONIFIED : Frame.NORMAL);
         setVisible(!isVisible());
+        toFront();
     }
 
 }
