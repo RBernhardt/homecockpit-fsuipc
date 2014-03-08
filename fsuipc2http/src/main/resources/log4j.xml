@@ -10,15 +10,13 @@
 		</layout>
 	</appender>
 
-    <appender name="sns" class="de.newsarea.homecockpit.fsuipc2http.log4j.SnsSyncAppender">
+    <!--appender name="sns" class="de.newsarea.homecockpit.fsuipc2http.log4j.SnsSyncAppender">
         <param name="TopicARN" value="arn:aws:sns:us-east-1:112626959872:fsuipc2net-logging" />
-        <param name="AccessKey" value="AKIAIHZVNH4HDBHUMSMQ" />
-        <param name="SecretKey" value="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" />
         <param name="Threshold" value="ERROR" />
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern" value="%d [%t] %-5p %c - %m%n" />
         </layout>
-    </appender>
+    </appender-->
 
     <appender name="logPanel" class="de.newsarea.homecockpit.fsuipc2http.log4j.JPanelSyncAppender">
         <param name="Threshold" value="INFO" />
