@@ -87,7 +87,7 @@ public class ApplicationWindow extends JFrame {
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setLocationRelativeTo(null);
         this.pack();
-        this.setVisible(true);
+        this.setVisible(false);
         this.addWindowListener(new WindowAdapter() {
             @Override
             public void windowIconified(WindowEvent e) {
