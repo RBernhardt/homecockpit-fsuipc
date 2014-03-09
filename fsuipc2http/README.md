@@ -1,6 +1,6 @@
-# Homecockpit FSUIPC2HTTP
+# FSUIPC HTTP-Server
 
-Java library for FSUIPC which is based on the java implementation of the [FSUIPC SDK](http://www.schiratti.com/dowson.html).
+The FSUIPC HTTP-Server can be used to connect to fsuipc over the network.
 
 ## Requires
 

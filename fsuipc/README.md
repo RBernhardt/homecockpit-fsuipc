@@ -1,4 +1,4 @@
-# Homecockpit FSUIPC
+# FSUIPC Library
 
 Java library for FSUIPC which is based on the java implementation of the [FSUIPC SDK](http://www.schiratti.com/dowson.html).
 
