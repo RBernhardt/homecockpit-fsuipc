@@ -29,7 +29,7 @@
 	<root>
 		<priority value="INFO" />
 		<appender-ref ref="console" />
-        <appender-ref ref="sns" />
+        <!--appender-ref ref="sns" -/-->
         <appender-ref ref="logPanel" />
 	</root>
 
