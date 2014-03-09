@@ -19,7 +19,6 @@ public class ApplicationWindow extends JFrame {
     private static final Logger log = LoggerFactory.getLogger(ApplicationWindow.class);
 
     private JLabel lStatus;
-    private JLogPanel logPanel;
 
     public ApplicationWindow() {
         super("FSUIPC 2 HTTP");
