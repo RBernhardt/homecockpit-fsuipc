@@ -33,15 +33,38 @@ public class FSUIPCController {
         try {
             int offset = Integer.parseInt(offsetHexString, 16);
             // read offset and return result
-            OffsetItem offsetItem = fsuipcFlightSimInterface.read(new OffsetIdent(offset, size));
-            return Response.ok().entity(offsetItem.getValue().toHexString()).build();
+            String value = readOffsetValue(offset, size);
+            return buildWithAllowOriginAll(Response.ok(value));
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
             return buildWithAllowOriginAll(Response.serverError());
         }
     }
 
-    @POST
+    @PUT
+    @Path("/offsets/{offset}")
+    @Consumes(MediaType.TEXT_PLAIN)
+    public Response postOffset(@PathParam(PARAM_OFFSET) String offsetHexString, String dataHexString) {
+        try {
+            int offset = Integer.parseInt(offsetHexString, 16);
+            // handle data key
+            if(StringUtils.isEmpty(dataHexString)) {
+                return Response.status(400).entity("data required").build();
+            }
+            ByteArray data = ByteArray.create(dataHexString);
+            // write message
+            OffsetItem offsetItem = new OffsetItem(offset, data.getSize(), data);
+            fsuipcFlightSimInterface.write(offsetItem);
+            // read value
+            String value = readOffsetValue(offset, data.getSize());
+            return buildWithAllowOriginAll(Response.ok(value));
+        } catch(Exception ex) {
+            log.error(ex.getMessage(), ex);
+            return buildWithAllowOriginAll(Response.serverError());
+        }
+    }
+
+    @PUT
     @Path("/offsets/{offset}")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Response postOffset(@PathParam(PARAM_OFFSET) String offsetHexString, MultivaluedMap<String, String> formParams) {
@@ -62,28 +85,9 @@ public class FSUIPCController {
             // write message
             OffsetItem offsetItem = new OffsetItem(offset, data.getSize(), data);
             fsuipcFlightSimInterface.write(offsetItem, timeOfBlocking);
-            return Response.ok().build();
-        } catch(Exception ex) {
-            log.error(ex.getMessage(), ex);
-            return buildWithAllowOriginAll(Response.serverError());
-        }
-    }
-
-    @POST
-    @Path("/offsets/{offset}")
-    @Consumes(MediaType.TEXT_PLAIN)
-    public Response postOffset(@PathParam(PARAM_OFFSET) String offsetHexString, String dataHexString) {
-        try {
-            int offset = Integer.parseInt(offsetHexString, 16);
-            // handle data key
-            if(StringUtils.isEmpty(dataHexString)) {
-                return Response.status(400).entity("data required").build();
-            }
-            ByteArray data = ByteArray.create(dataHexString);
-            // write message
-            OffsetItem offsetItem = new OffsetItem(offset, data.getSize(), data);
-            fsuipcFlightSimInterface.write(offsetItem);
-            return Response.ok().build();
+            // read value
+            String value = readOffsetValue(offset, data.getSize());
+            return buildWithAllowOriginAll(Response.ok(value));
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
             return buildWithAllowOriginAll(Response.serverError());
@@ -109,7 +113,7 @@ public class FSUIPCController {
             int size = Integer.parseInt(sizeString);
             // monitor offset
             fsuipcFlightSimInterface.monitor(new OffsetIdent(offset, size));
-            return Response.ok().build();
+            return buildWithAllowOriginAll(Response.ok());
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
             return buildWithAllowOriginAll(Response.serverError());
@@ -117,6 +121,12 @@ public class FSUIPCController {
     }
 
     /* HELPER */
+
+    private String readOffsetValue(int offset, int size) {
+        OffsetItem offsetItem = fsuipcFlightSimInterface.read(new OffsetIdent(offset, size));
+        String value = offsetItem.getValue().toHexString();
+        return value;
+    }
 
     private Response buildWithAllowOriginAll(Response.ResponseBuilder responseBuilder) {
         return responseBuilder.header("Access-Control-Allow-Origin", "*").build();
