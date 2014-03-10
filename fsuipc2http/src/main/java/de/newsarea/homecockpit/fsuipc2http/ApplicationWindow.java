@@ -1,6 +1,5 @@
 package de.newsarea.homecockpit.fsuipc2http;
 
-import de.newsarea.homecockpit.fsuipc2http.log4j.JLogPanel;
 import de.newsarea.homecockpit.fsuipc2http.log4j.JPanelSyncAppender;
 import de.newsarea.homecockpit.fsuipc2http.watchdog.event.ConnectorStateChangedEventListener;
 import org.slf4j.Logger;
@@ -18,7 +17,7 @@ public class ApplicationWindow extends JFrame {
 
     private static final Logger log = LoggerFactory.getLogger(ApplicationWindow.class);
 
-    private JLabel lStatus;
+    private JLabel txtStatus;
 
     public ApplicationWindow() {
         super("FSUIPC 2 HTTP");
@@ -29,14 +28,11 @@ public class ApplicationWindow extends JFrame {
         this.getContentPane().add(createMainPanel());
     }
 
-
-
     private JPanel createMainPanel() {
         JPanel panel = new JPanel();
         panel.setPreferredSize(new Dimension(800, 600));
         panel.setLayout(new BorderLayout());
         panel.add(createInfoPanel(), BorderLayout.NORTH);
-        panel.add(createStatusPanel());
         panel.add(createLogPanel(), BorderLayout.CENTER);
         return panel;
     }
@@ -56,9 +52,9 @@ public class ApplicationWindow extends JFrame {
         JLabel lTitle = new JLabel("Server / IP: ");
         lTitle.setPreferredSize(new Dimension(90, 25));
         panel.add(lTitle);
-        JLabel lValue = new JLabel();
-        lValue.setText(determineHostAddress());
-        panel.add(lValue);
+        JLabel txtValue = new JLabel();
+        txtValue.setText(determineHostAddress());
+        panel.add(txtValue);
         return panel;
     }
 
@@ -68,8 +64,9 @@ public class ApplicationWindow extends JFrame {
         JLabel lTitle = new JLabel("Connection: ");
         lTitle.setPreferredSize(new Dimension(90, 25));
         panel.add(lTitle);
-        lStatus = new JLabel(ConnectorStateChangedEventListener.State.CLOSED.toString());
-        panel.add(lStatus);
+        txtStatus = new JLabel();
+        txtStatus.setText(ConnectorStateChangedEventListener.State.CLOSED.toString());
+        panel.add(txtStatus);
         return panel;
     }
 
@@ -77,9 +74,14 @@ public class ApplicationWindow extends JFrame {
         return JPanelSyncAppender.getJLogPanel();
     }
 
-    public void setConnectionStatus(String status) {
-        if(lStatus == null) { return; }
-        lStatus.setText(status);
+    public void setConnectionStatus(final String status) {
+        if(txtStatus == null) { return; }
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                txtStatus.setText(status);
+            }
+        });
     }
 
     public void showWindow() throws AWTException {
@@ -96,7 +98,7 @@ public class ApplicationWindow extends JFrame {
         showTrayIcon();
     }
 
-    public void showTrayIcon() throws AWTException {
+    private void showTrayIcon() throws AWTException {
         URL imageURL = ApplicationWindow.class.getResource("/icon/tray.png");
         Image image = Toolkit.getDefaultToolkit().getImage(imageURL);
         final TrayIcon trayIcon = new TrayIcon(image);
