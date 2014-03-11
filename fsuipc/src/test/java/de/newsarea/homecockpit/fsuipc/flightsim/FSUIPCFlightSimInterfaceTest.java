@@ -71,13 +71,20 @@ public class FSUIPCFlightSimInterfaceTest {
 
     @Test
     public void shouldRead() throws IOException {
+        when(flightSimWrapper.isConnectionEstablished()).thenReturn(true);
         when(flightSimWrapper.read(1010, 1)).thenReturn(new byte[]{1});
+        fsuipcFlightSimInterface.open();
+        // then
         assertEquals(new OffsetItem(1010, 1, ByteArray.create("1", 1)), fsuipcFlightSimInterface.read(new OffsetIdent(1010, 1)));
     }
 
     @Test
     public void shouldWriteSingleItem() throws IOException {
+        when(flightSimWrapper.isConnectionEstablished()).thenReturn(true);
+        fsuipcFlightSimInterface.open();
+        // when
         fsuipcFlightSimInterface.write(new OffsetItem(1000, 8, new byte[]{5, 6, 7}));
+        // then
         assertEquals(lastWriteOffsetItems.size(), 1);
         assertEquals(1000, lastWriteOffsetItems.get(0).getOffset());
         assertEquals(8, lastWriteOffsetItems.get(0).getSize());
@@ -138,6 +145,9 @@ public class FSUIPCFlightSimInterfaceTest {
     @Test
     public void shouldWriteWithDelay() throws Exception {
         Date startTime = new Date();
+        when(flightSimWrapper.isConnectionEstablished()).thenReturn(true);
+        fsuipcFlightSimInterface.open();
+        // when
         fsuipcFlightSimInterface.write(new OffsetItem(0x0001, 1, ByteArray.create("1", 1)), 15);
         // then
         assertTrue(new Date().getTime() - startTime.getTime() > 10);
@@ -146,8 +156,10 @@ public class FSUIPCFlightSimInterfaceTest {
 
     @Test
     public void shouldSyncronisedWrite() throws Exception {
-        ExecutorService executorService =  Executors.newFixedThreadPool(10);
+        when(flightSimWrapper.isConnectionEstablished()).thenReturn(true);
+        fsuipcFlightSimInterface.open();
         // when
+        ExecutorService executorService =  Executors.newFixedThreadPool(10);
         for(int i=0; i < 10; i++) {
             executorService.execute(new Runnable() {
                 @Override
