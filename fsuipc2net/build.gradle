@@ -49,3 +49,5 @@ applicationDistribution.from(applicationDistributionNativeLibs) {
 installApp {
     destinationDir = file(distInstallPath + "/Fsuipc2Net")
 }
+
+uploadArchives.enabled = false
