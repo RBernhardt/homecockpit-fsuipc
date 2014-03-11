@@ -6,7 +6,6 @@ mainClassName = "de.newsarea.homecockpit.fsuipc.example.Application"
 
 dependencies {
     compile project(":fsuipc")
-    compile files("lib/kryonet-2.18-all.jar")
     compile "org.slf4j:slf4j-simple:1.7.5"
 }
 
