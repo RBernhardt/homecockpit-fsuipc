@@ -36,6 +36,8 @@ public class FSUIPCController {
             // read offset and return result
             String value = readOffsetValue(offset, size);
             return buildWithAllowOriginAll(Response.ok(value));
+        } catch(IOException ex) {
+             return buildWithAllowOriginAll(Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(ex.getMessage()));
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
             return buildWithAllowOriginAll(Response.serverError());
@@ -59,6 +61,8 @@ public class FSUIPCController {
             // read value
             String value = readOffsetValue(offset, data.getSize());
             return buildWithAllowOriginAll(Response.ok(value));
+        } catch(IOException ex) {
+            return buildWithAllowOriginAll(Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(ex.getMessage()));
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
             return buildWithAllowOriginAll(Response.serverError());
@@ -89,6 +93,8 @@ public class FSUIPCController {
             // read value
             String value = readOffsetValue(offset, data.getSize());
             return buildWithAllowOriginAll(Response.ok(value));
+        } catch(IOException ex) {
+            return buildWithAllowOriginAll(Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(ex.getMessage()));
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
             return buildWithAllowOriginAll(Response.serverError());
