@@ -11,7 +11,6 @@ public class Application {
 
     public static void main(String[] args) throws InterruptedException, ConnectException {
         FSUIPCInterface fsuipcInterface = FSUIPCFlightSimInterface.getInstance();
-        //FSUIPCInterface fsuipcInterface = new FSUIPCKryonetInterface("drevil", 4020);
         // ~
         Application app = new Application();
         app.run(fsuipcInterface);
