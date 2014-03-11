@@ -23,13 +23,12 @@ public class FSUIPCWatchdogHandler implements MonitorableConnector {
 
     @Override
     public boolean reconnect() {
-        log.info("reconnect fsuipcFlightSimInterface");
         fsuipcFlightSimInterface.close();
         try {
             fsuipcFlightSimInterface.open();
             return true;
         } catch (ConnectException e) {
-            log.error(e.getMessage(), e);
+            log.info(e.getMessage());
         }
         return false;
     }

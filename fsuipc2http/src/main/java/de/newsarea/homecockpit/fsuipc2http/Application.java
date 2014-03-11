@@ -83,10 +83,7 @@ public class Application {
         fsuipcFlightSimInterface = (FSUIPCFlightSimInterface) appCtx.getBean("fsuipcInterface");
         // ~
         try {
-            fsuipcFlightSimInterface.open();
-            // ~
             connectorWatchdog.monitorConnector("fsuipcFlightSimInterface", new FSUIPCWatchdogHandler(fsuipcFlightSimInterface));
-            connectorWatchdog.start();
             // ~
             URI baseURI = getBaseURI(cmdOptions.getHttpPort());
             httpServer = GrizzlyHttpServerFactory.createHttpServer(baseURI, create(), false);

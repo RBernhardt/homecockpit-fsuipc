@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.io.IOException;
 import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -69,13 +70,13 @@ public class FSUIPCFlightSimInterfaceTest {
     }
 
     @Test
-    public void shouldRead() {
+    public void shouldRead() throws IOException {
         when(flightSimWrapper.read(1010, 1)).thenReturn(new byte[]{1});
         assertEquals(new OffsetItem(1010, 1, ByteArray.create("1", 1)), fsuipcFlightSimInterface.read(new OffsetIdent(1010, 1)));
     }
 
     @Test
-    public void shouldWriteSingleItem() {
+    public void shouldWriteSingleItem() throws IOException {
         fsuipcFlightSimInterface.write(new OffsetItem(1000, 8, new byte[]{5, 6, 7}));
         assertEquals(lastWriteOffsetItems.size(), 1);
         assertEquals(1000, lastWriteOffsetItems.get(0).getOffset());
@@ -151,7 +152,11 @@ public class FSUIPCFlightSimInterfaceTest {
             executorService.execute(new Runnable() {
                 @Override
                 public void run() {
-                    fsuipcFlightSimInterface.write(new OffsetItem(0x0001, 1, ByteArray.create("1", 1)), 20);
+                    try {
+                        fsuipcFlightSimInterface.write(new OffsetItem(0x0001, 1, ByteArray.create("1", 1)), 20);
+                    } catch (IOException e) {
+                        log.error(e.getMessage(), e);
+                    }
                 }
             });
         }

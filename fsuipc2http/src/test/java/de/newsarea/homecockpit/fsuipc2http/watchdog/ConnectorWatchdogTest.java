@@ -33,7 +33,6 @@ public class ConnectorWatchdogTest {
         MonitorableConnector monitorableConnector = mock(MonitorableConnector.class);
         when(monitorableConnector.isAlive()).thenReturn(true);
         connectorWatchdog.monitorConnector("CONNECTOR1", monitorableConnector);
-        connectorWatchdog.start();
         Thread.sleep(1);
         // then
         verify(connectorStateChangedEventListener).stateChanged(eq(ConnectorStateChangedEventListener.State.OPEN));
@@ -49,7 +48,6 @@ public class ConnectorWatchdogTest {
         MonitorableConnector monitorableConnector = mock(MonitorableConnector.class);
         when(monitorableConnector.isAlive()).thenReturn(false);
         connectorWatchdog.monitorConnector("CONNECTOR1", monitorableConnector);
-        connectorWatchdog.start();
         Thread.sleep(1);
         // then
         verify(connectorStateChangedEventListener).stateChanged(eq(ConnectorStateChangedEventListener.State.CLOSED));
@@ -62,7 +60,6 @@ public class ConnectorWatchdogTest {
         MonitorableConnector monitorableConnector = mock(MonitorableConnector.class);
         when(monitorableConnector.isAlive()).thenReturn(true);
         connectorWatchdog.monitorConnector("CONNECTOR1", monitorableConnector);
-        connectorWatchdog.start();
         Thread.sleep(1);
         // then
         verify(monitorableConnector, never()).reconnect();
@@ -75,7 +72,6 @@ public class ConnectorWatchdogTest {
         MonitorableConnector monitorableConnector = mock(MonitorableConnector.class);
         when(monitorableConnector.isAlive()).thenReturn(false);
         connectorWatchdog.monitorConnector("CONNECTOR1", monitorableConnector);
-        connectorWatchdog.start();
         Thread.sleep(1);
         // then
         verify(monitorableConnector).reconnect();

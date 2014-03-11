@@ -5,6 +5,7 @@ import org.apache.commons.lang3.event.EventListenerSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.*;
 
@@ -22,10 +23,6 @@ public class ConnectorWatchdog {
         lastStates = new ConcurrentHashMap<>();
         eventListenerEventListenerSupport = EventListenerSupport.create(ConnectorStateChangedEventListener.class);
         watchdogExecutorServiceList = new ConcurrentHashMap<>();
-    }
-
-    public void start() {
-        /* do nothing */
     }
 
     public void stop() {
@@ -61,7 +58,7 @@ public class ConnectorWatchdog {
                 monitorableConnector.reconnect();
             }
         } catch(Exception ex) {
-            log.error(ex.getMessage());
+            log.error(ex.getMessage(), ex);
         }
     }
 

@@ -74,17 +74,21 @@ class FSUIPCSwingUI extends JFrame {
      * Offset: 0x0262; Size: 2;
      */
     private void togglePause() {
-        OffsetItem pauseOffsetItem = fsuipcInterface.read(new OffsetIdent(0x0262, 2));
-        int pauseOffsetValue = pauseOffsetItem.getValue().toShort();
-        switch(pauseOffsetValue) {
-            case 0:
-                fsuipcInterface.write(new OffsetItem(0x0262, 2, ByteArray.create("1", 2)));
-                break;
-            case 1:
-                fsuipcInterface.write(new OffsetItem(0x0262, 2, ByteArray.create("0", 2)));
-                break;
-            default:
-                throw new IllegalStateException("invalid value - " + pauseOffsetValue);
+        try {
+            OffsetItem pauseOffsetItem = fsuipcInterface.read(new OffsetIdent(0x0262, 2));
+            int pauseOffsetValue = pauseOffsetItem.getValue().toShort();
+            switch(pauseOffsetValue) {
+                case 0:
+                    fsuipcInterface.write(new OffsetItem(0x0262, 2, ByteArray.create("1", 2)));
+                    break;
+                case 1:
+                    fsuipcInterface.write(new OffsetItem(0x0262, 2, ByteArray.create("0", 2)));
+                    break;
+                default:
+                    throw new IllegalStateException("invalid value - " + pauseOffsetValue);
+            }
+        } catch(Exception e) {
+            e.printStackTrace();
         }
     }
 

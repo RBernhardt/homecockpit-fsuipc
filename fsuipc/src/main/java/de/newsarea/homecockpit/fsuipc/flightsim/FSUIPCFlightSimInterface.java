@@ -9,6 +9,8 @@ import de.newsarea.homecockpit.fsuipc.event.OffsetEventListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.ConnectException;
 
 public class FSUIPCFlightSimInterface implements FSUIPCInterface {
@@ -16,6 +18,7 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 	private static final Logger log = LoggerFactory.getLogger(FSUIPCFlightSimInterface.class);
 
     private static FSUIPCFlightSimInterface fsuipcFlightSimInterface;
+    private boolean isOpenConnection = false;
 
     /**
      * @return Singleton of FlightSim FSUIPC Interface
@@ -38,16 +41,20 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 	public void open() throws ConnectException {
         fsuipcFlightSimWrapper.open();
         // validate connection
-        if(!isConnectionEstablished()) {
+        if(!fsuipcFlightSimWrapper.isConnectionEstablished()) {
             fsuipcFlightSimWrapper.close();
             throw new ConnectException("can't establish a connection");
         }
         // ~
         offsetMonitor.open();
+        // ~
+        isOpenConnection = true;
 	}
 
     public boolean isConnectionEstablished() {
-        return fsuipcFlightSimWrapper.isConnectionEstablished();
+        if(!isOpenConnection) { return false; }
+        isOpenConnection = fsuipcFlightSimWrapper.isConnectionEstablished();
+        return isOpenConnection;
     }
 
     @Override
@@ -55,11 +62,14 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
         offsetMonitor.monitorOffset(offsetIdent);
 	}
 
-    public void write(OffsetItem offsetItem) {
+    public void write(OffsetItem offsetItem) throws IOException {
         write(offsetItem, 0);
     }
 
-	public synchronized void write(OffsetItem offsetItem, int timeOfBlocking) {
+	public synchronized void write(OffsetItem offsetItem, int timeOfBlocking) throws IOException {
+        if(!isOpenConnection) {
+            throw new IOException("connection is not established");
+        }
 		log.debug("write offset p {}" + offsetItem);
         fsuipcFlightSimWrapper.write(offsetItem.getOffset(), offsetItem.getSize(), offsetItem.getValue().toLittleEndian());
         if(timeOfBlocking > 0) {
@@ -71,13 +81,18 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
         }
     }
 
-    public OffsetItem read(OffsetIdent offsetIdent) {
+    public OffsetItem read(OffsetIdent offsetIdent) throws IOException {
+        if(!isOpenConnection) {
+            throw new IOException("connection is not established");
+        }
+        // ~
 		byte[] data = fsuipcFlightSimWrapper.read(offsetIdent.getOffset(), offsetIdent.getSize());
         ByteArray byteArray = ByteArray.create(data, true);
         return new OffsetItem(offsetIdent.getOffset(), offsetIdent.getSize(), byteArray);
 	}
 
 	public void close() {
+        isOpenConnection = false;
 		offsetMonitor.close();
 		fsuipcFlightSimWrapper.close();
 	}

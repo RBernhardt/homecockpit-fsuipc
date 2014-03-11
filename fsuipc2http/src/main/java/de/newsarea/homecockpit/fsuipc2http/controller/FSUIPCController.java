@@ -12,6 +12,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 
 @Path("/")
 public class FSUIPCController {
@@ -122,7 +123,7 @@ public class FSUIPCController {
 
     /* HELPER */
 
-    private String readOffsetValue(int offset, int size) {
+    private String readOffsetValue(int offset, int size) throws IOException {
         OffsetItem offsetItem = fsuipcFlightSimInterface.read(new OffsetIdent(offset, size));
         String value = offsetItem.getValue().toHexString();
         return value;
