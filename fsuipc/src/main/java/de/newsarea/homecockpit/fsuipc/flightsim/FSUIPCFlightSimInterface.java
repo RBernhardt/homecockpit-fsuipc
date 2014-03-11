@@ -37,8 +37,18 @@ public class FSUIPCFlightSimInterface implements FSUIPCInterface {
 
 	public void open() throws ConnectException {
         fsuipcFlightSimWrapper.open();
+        // validate connection
+        if(!isConnectionEstablished()) {
+            fsuipcFlightSimWrapper.close();
+            throw new ConnectException("can't establish a connection");
+        }
+        // ~
         offsetMonitor.open();
 	}
+
+    public boolean isConnectionEstablished() {
+        return fsuipcFlightSimWrapper.isConnectionEstablished();
+    }
 
     @Override
 	public void monitor(OffsetIdent offsetIdent) {

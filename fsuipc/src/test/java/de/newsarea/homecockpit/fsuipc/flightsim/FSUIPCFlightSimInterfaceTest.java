@@ -51,6 +51,8 @@ public class FSUIPCFlightSimInterfaceTest {
 
     @Test
     public void shouldOpenAndClose() {
+        when(flightSimWrapper.isConnectionEstablished()).thenReturn(true);
+        // then
         try {
             fsuipcFlightSimInterface.open();
         } catch (ConnectException e) {
@@ -58,6 +60,12 @@ public class FSUIPCFlightSimInterfaceTest {
         }
         fsuipcFlightSimInterface.close();
         assertTrue(true);
+    }
+
+    @Test(expectedExceptions = ConnectException.class)
+    public void shouldNotOpen() throws Exception {
+        when(flightSimWrapper.isConnectionEstablished()).thenReturn(false);
+        fsuipcFlightSimInterface.open();
     }
 
     @Test
@@ -78,6 +86,7 @@ public class FSUIPCFlightSimInterfaceTest {
 
     @Test
     public void shouldMonitorManyOffsetIdents() throws InterruptedException, ConnectException {
+        when(flightSimWrapper.isConnectionEstablished()).thenReturn(true);
         when(flightSimWrapper.read(anyInt(), anyInt())).thenReturn(new byte[]{(byte) 0xFF});
         fsuipcFlightSimInterface.open();
         //
@@ -107,6 +116,7 @@ public class FSUIPCFlightSimInterfaceTest {
     @Test
     public void shouldWriteOnlyNewValues() throws Exception {
         // given
+        when(flightSimWrapper.isConnectionEstablished()).thenReturn(true);
         final List<OffsetItem> offsetItemList = new ArrayList<>();
         when(flightSimWrapper.read(eq(0x0001), eq(1))).thenReturn(new byte[] { 0x0A });
         fsuipcFlightSimInterface.addEventListener(new OffsetEventListener() {

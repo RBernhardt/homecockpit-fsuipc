@@ -1,7 +1,5 @@
 package de.newsarea.homecockpit.fsuipc2http.watchdog;
 
-import de.newsarea.homecockpit.fsuipc.domain.OffsetIdent;
-import de.newsarea.homecockpit.fsuipc.domain.OffsetItem;
 import de.newsarea.homecockpit.fsuipc.flightsim.FSUIPCFlightSimInterface;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,12 +18,7 @@ public class FSUIPCWatchdogHandler implements MonitorableConnector {
 
     @Override
     public boolean isAlive() {
-        OffsetItem offsetItem = fsuipcFlightSimInterface.read(new OffsetIdent(0x0274, 2));
-        if(offsetItem != null) {
-            short value = offsetItem.getValue().toShort();
-            return value > 0;
-        }
-        return false;
+        return fsuipcFlightSimInterface.isConnectionEstablished();
     }
 
     @Override

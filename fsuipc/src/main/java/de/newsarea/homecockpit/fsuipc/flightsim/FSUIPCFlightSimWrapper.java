@@ -25,6 +25,14 @@ class FSUIPCFlightSimWrapper {
             throw new ConnectException(ex.getMessage());
         }
     }
+
+    public boolean isConnectionEstablished() {
+        byte[] value = read(0x0274, 2);
+        if(value[0] != 0 || value[1] != 0) {
+            return true;
+        }
+        return false;
+    }
 	
 	public void write(int offset, int size, byte[] data) {
 		fsuipc_wrapper.WriteData(offset, size, data);

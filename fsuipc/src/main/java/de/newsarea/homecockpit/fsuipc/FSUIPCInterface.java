@@ -11,6 +11,8 @@ public interface FSUIPCInterface {
 	
 	void open() throws ConnectException;
 
+    boolean isConnectionEstablished();
+
 	void monitor(OffsetIdent offsetIdent);
 
 	void write(OffsetItem offsetItem);
