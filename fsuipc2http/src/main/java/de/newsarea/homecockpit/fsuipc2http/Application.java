@@ -4,6 +4,7 @@ import de.newsarea.homecockpit.fsuipc.flightsim.FSUIPCFlightSimInterface;
 import de.newsarea.homecockpit.fsuipc2http.cmd.CMDOptions;
 import de.newsarea.homecockpit.fsuipc2http.cmd.CMDParser;
 import de.newsarea.homecockpit.fsuipc2http.controller.FSUIPCController;
+import de.newsarea.homecockpit.fsuipc2http.controller.StatusController;
 import de.newsarea.homecockpit.fsuipc2http.netty.OutputSocketServer;
 import de.newsarea.homecockpit.fsuipc2http.watchdog.ConnectorWatchdog;
 import de.newsarea.homecockpit.fsuipc2http.watchdog.FSUIPCWatchdogHandler;
@@ -105,7 +106,9 @@ public class Application {
     }
 
     public ResourceConfig create() {
-        return new ResourceConfig().register(new FSUIPCController(fsuipcFlightSimInterface));
+        return new ResourceConfig()
+            .register(new FSUIPCController(fsuipcFlightSimInterface))
+            .register(new StatusController(fsuipcFlightSimInterface));
     }
 
     public void shutdown() {
