@@ -35,9 +35,9 @@ public class FSUIPCController {
             int offset = Integer.parseInt(offsetHexString, 16);
             // read offset and return result
             String value = readOffsetValue(offset, size);
-            return buildWithAllowOriginAll(Response.ok(value));
+            return buildWithAllowOriginAll(Response.ok(value, MediaType.TEXT_PLAIN));
         } catch(IOException ex) {
-             return buildWithAllowOriginAll(Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(ex.getMessage()));
+             return buildWithAllowOriginAll(Response.status(Response.Status.SERVICE_UNAVAILABLE));
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
             return buildWithAllowOriginAll(Response.serverError());
@@ -60,9 +60,9 @@ public class FSUIPCController {
             fsuipcFlightSimInterface.write(offsetItem);
             // read value
             String value = readOffsetValue(offset, data.getSize());
-            return buildWithAllowOriginAll(Response.ok(value));
+            return buildWithAllowOriginAll(Response.ok(value, MediaType.TEXT_PLAIN));
         } catch(IOException ex) {
-            return buildWithAllowOriginAll(Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(ex.getMessage()));
+            return buildWithAllowOriginAll(Response.status(Response.Status.SERVICE_UNAVAILABLE));
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
             return buildWithAllowOriginAll(Response.serverError());
@@ -92,9 +92,9 @@ public class FSUIPCController {
             fsuipcFlightSimInterface.write(offsetItem, timeOfBlocking);
             // read value
             String value = readOffsetValue(offset, data.getSize());
-            return buildWithAllowOriginAll(Response.ok(value));
+            return buildWithAllowOriginAll(Response.ok(value, MediaType.TEXT_PLAIN));
         } catch(IOException ex) {
-            return buildWithAllowOriginAll(Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(ex.getMessage()));
+            return buildWithAllowOriginAll(Response.status(Response.Status.SERVICE_UNAVAILABLE));
         } catch(Exception ex) {
             log.error(ex.getMessage(), ex);
             return buildWithAllowOriginAll(Response.serverError());
