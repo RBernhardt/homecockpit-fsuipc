@@ -14,6 +14,8 @@ The FSUIPC HTTP-Server can be used to connect to fsuipc over the network.
 
 Example use of the FSUIPC Library
 
+![Example](./docs/images/screenshot-example.png)
+
 ## Requires
 
 * FSUIPC ([http://www.schiratti.com/dowson.html](http://www.schiratti.com/dowson.html))
