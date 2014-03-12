@@ -8,9 +8,13 @@ Java library for FSUIPC which is based on the java implementation of the [FSUIPC
 
 The FSUIPC HTTP-Server can be used to connect to fsuipc over the network.
 
+![FSUIPC2HTTP](./docs/images/screenshot-fsuipc2http.png)
+
 ### [FSUIPC Library Example](./example)
 
 Example use of the FSUIPC Library
+
+![Example](./docs/images/screenshot-example.png)
 
 ## Requires
 
