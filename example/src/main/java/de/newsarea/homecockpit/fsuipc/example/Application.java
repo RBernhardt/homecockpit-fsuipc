@@ -17,7 +17,7 @@ public class Application {
     }
 
     private void run(final FSUIPCInterface fsuipcInterface) throws ConnectException {
-        //fsuipcInterface.open();
+        fsuipcInterface.open();
         // ~
         FSUIPCSwingUI fsuipSwingUI = new FSUIPCSwingUI(fsuipcInterface);
         fsuipSwingUI.addWindowListener(new WindowAdapter() {
