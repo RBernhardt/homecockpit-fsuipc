@@ -154,31 +154,4 @@ public class FSUIPCFlightSimInterfaceTest {
         verify(flightSimWrapper).write(0x0001, 1, new byte[] { 1 });
     }
 
-    @Test
-    public void shouldSyncronisedWrite() throws Exception {
-        when(flightSimWrapper.isConnectionEstablished()).thenReturn(true);
-        fsuipcFlightSimInterface.open();
-        // when
-        ExecutorService executorService =  Executors.newFixedThreadPool(10);
-        for(int i=0; i < 10; i++) {
-            executorService.execute(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        fsuipcFlightSimInterface.write(new OffsetItem(0x0001, 1, ByteArray.create("1", 1)), 20);
-                    } catch (IOException e) {
-                        log.error(e.getMessage(), e);
-                    }
-                }
-            });
-        }
-        Thread.sleep(10);
-        // then
-        verify(flightSimWrapper).write(anyInt(), anyInt(), any(byte[].class));
-        // shutdown
-        executorService.shutdown();
-        executorService.awaitTermination(1, TimeUnit.SECONDS);
-        //
-        verify(flightSimWrapper, times(10)).write(anyInt(), anyInt(), any(byte[].class));
-    }
 }
