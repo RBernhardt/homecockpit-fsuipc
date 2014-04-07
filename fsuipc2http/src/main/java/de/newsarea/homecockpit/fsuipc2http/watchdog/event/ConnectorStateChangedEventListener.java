@@ -7,6 +7,6 @@ public interface ConnectorStateChangedEventListener {
         CLOSED
     }
 
-    void stateChanged(State state);
+    void stateChanged(String id, State state);
 
 }

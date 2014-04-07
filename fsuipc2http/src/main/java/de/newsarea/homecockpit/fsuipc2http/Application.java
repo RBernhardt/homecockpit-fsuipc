@@ -75,7 +75,7 @@ public class Application {
         connectorWatchdog = new ConnectorWatchdog();
         connectorWatchdog.addEventListerner(new ConnectorStateChangedEventListener() {
             @Override
-            public void stateChanged(State state) {
+            public void stateChanged(String id, State state) {
                 applicationWindow.setConnectionStatus(state.toString());
             }
         });
