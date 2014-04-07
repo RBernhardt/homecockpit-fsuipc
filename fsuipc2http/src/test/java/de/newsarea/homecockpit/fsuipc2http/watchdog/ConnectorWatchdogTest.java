@@ -35,7 +35,7 @@ public class ConnectorWatchdogTest {
         connectorWatchdog.monitorConnector("CONNECTOR1", monitorableConnector);
         Thread.sleep(1);
         // then
-        verify(connectorStateChangedEventListener).stateChanged(eq(ConnectorStateChangedEventListener.State.OPEN));
+        verify(connectorStateChangedEventListener).stateChanged("CONNECTOR1", eq(ConnectorStateChangedEventListener.State.OPEN));
         // close
         connectorWatchdog.stop();
     }
@@ -50,7 +50,7 @@ public class ConnectorWatchdogTest {
         connectorWatchdog.monitorConnector("CONNECTOR1", monitorableConnector);
         Thread.sleep(1);
         // then
-        verify(connectorStateChangedEventListener).stateChanged(eq(ConnectorStateChangedEventListener.State.CLOSED));
+        verify(connectorStateChangedEventListener).stateChanged("CONNECTOR1", eq(ConnectorStateChangedEventListener.State.CLOSED));
         // close
         connectorWatchdog.stop();
     }

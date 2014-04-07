@@ -5,9 +5,11 @@ import org.apache.commons.lang3.event.EventListenerSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class ConnectorWatchdog {
 
@@ -51,7 +53,7 @@ public class ConnectorWatchdog {
             if(lastState == null || !currentState.equals(lastState)) {
                 lastStates.put(id, currentState);
                 // fire state changed event
-                eventListenerEventListenerSupport.fire().stateChanged(currentState);
+                eventListenerEventListenerSupport.fire().stateChanged(id, currentState);
             }
             // try to reconnect
             if(currentState == ConnectorStateChangedEventListener.State.CLOSED) {
